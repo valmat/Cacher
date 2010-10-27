@@ -1,0 +1,123 @@
+<?php
+echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
+ require './config.php';
+
+ //define('DFLT_CACHEBKND','MemReCache');
+ //define('DFLT_CACHEBKND','Memcache');
+################################################################################
+/**
+  *   __autoload
+  */
+   function __autoload($ClassName){
+       //require_once PATH_CLASS.'/class.'.strtolower($ClassName).'.php';
+       require './class.'.strtolower($ClassName).'.php';
+    }
+    
+ //echo  Cacher::name('test');
+
+ 
+ //echo  SimplTempl::Plug('test',0,5);
+ //echo  SimplTempl::Plug('test1');
+
+################################################################################
+
+ /*
+  * class User
+  */
+//echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
+
+ class User {
+    
+    public $id;
+    function __construct($id=5) {
+        $this->id = $id;
+    }
+ }
+//echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
+/*
+ Cacher::Slot('User',new User);
+
+ Cacher::newTag('SmplTag',15);
+
+echo '<hr><pre>';
+var_export(Cacher::$Backand_avaible);
+echo '</pre><hr>';
+*/
+/*
+    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    * Пример использования:
+    * 
+    * define AnyObj // может быть класс, массив или дрогой объект. На основании эого объекта слот функция вычислит ключь и, возможно другиие параметры (бэкэнд и время жизни).
+    * Cacher::Slot('AniObj',AniObj); // Инициализируем слот кеширования. Первый параметр для определения имени слота, второй - наш объект
+    *
+    * Получаем данные  
+    * if (false === ($CacheData = Cacher::get())) { // Если данные из кеша получить не удалось...
+    *     $CacheData = GetFromAnyExternal();        // Получаем данные из внешнего хранилища
+    *     Cacher::addTag(Cacher::newTag('AniTagData',AniTagDataObj)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+    *     $tag2 = Cacher::newTag('AniTagData2',AniTagDataObj1)        // Создаем новый тег
+    *     Cacher::addTag($tag2);                                      // добавляем новый тег к слоту перед сохрананеием в кеш
+    *     Cacher::set($CacheData);                                    // Кешируем данные
+    * }
+    * ...
+    * ...
+    * Если затем нужно сбросить какой нибудь тег, то нужно будет сделать так:
+    * Cacher::newTag('AniTagData2',AniTagDataObj1)->clear()        // Очищаем кеш тега
+    * 
+    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+*/
+
+    function GetFromAnyExternal(User $User){
+        return Array('username','userage'=>20, date('h:i:s A') );
+    }
+    $User = new User();
+    Cacher::Slot('User',$User);
+    echo Cacher::$BackendName;
+
+
+/*
+$CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
+Cacher::addTag(Cacher::newTag('SmplTag',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+Cacher::addTag(Cacher::newTag('SmplTag1',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+Cacher::set($CacheData);
+//Cacher::newTag('SmplTag1',$User)->clear();
+exit;
+*/
+$memcache = new Memcache();
+$memcache->connect('unix:///tmp/memcached.socket', 0);
+//$memcache->set('cachecnt',0,false,(5*3600));
+//$memcache->flush();exit;
+
+
+
+    if (false === ($CacheData = Cacher::get()))// Если данные из кеша получить не удалось...
+    { 
+         $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
+         Cacher::addTag(Cacher::newTag('SmplTag',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         Cacher::addTag(Cacher::newTag('SmplTag1',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         
+         //$memcache->decrement('cachecnt');
+         sleep(2);// hard data
+         $memcache->increment('cachecnt');
+         
+         
+         echo '<hr><font color=blue>Кешируем данные</font><hr>';
+    
+           
+         Cacher::set($CacheData);                                    // Кешируем данные
+         
+     }
+    //Cacher::del();
+    //Cacher::newTag('SmplTag',$User)->clear();
+    //Cacher::newTag('SmplTag1',$User)->clear();
+    
+    //Cacher::newTag('AniTagData2',AniTagDataObj1)->clear()        // Очищаем кеш тега
+
+echo '<hr>Кеширование объекта:<pre>';
+var_export($CacheData);
+echo '</pre><hr>';
+
+//echo '<hr><pre>';var_export(get_defined_functions());echo '</pre><hr>';
+echo '<hr>'.$memcache->get('cachecnt'); 
+echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
+
+?>
