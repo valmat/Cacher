@@ -1,6 +1,6 @@
 <?php
  echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Κα<br>';
- require './config.php';
+ require './config/config.php';
 
 ################################################################################
 /**
@@ -8,7 +8,7 @@
   */
    function __autoload($ClassName){
        //require_once PATH_CLASS.'/class.'.strtolower($ClassName).'.php';
-       require './class.'.strtolower($ClassName).'.php';
+       require './src/class.'.strtolower($ClassName).'.php';
     }
     
  //echo  Cacher::name('test');
