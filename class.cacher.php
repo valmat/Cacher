@@ -186,60 +186,7 @@ class Cacher {
     static function del() {
         self::$Backend->del(self::$CacheKey);
     }
-    
-    
-    
-    /**
-     * Returns Thru-proxy object to call a method with transparent caching.
-     * Usage:
-     *   $slot = new SomeSlot(...);
-     *   $slot->thru($person)->getSomethingHeavy();
-     *   // calls $person->getSomethingHeavy() with intermediate caching
-     * 
-     * @param mixed $obj    Object or classname. May be null if you want to
-     *                      thru-call a global function, not a method.
-     * @return Dklab_Cache_Frontend_Slot_Thru   Thru-proxy object.
-     */
-    /*
-    public function thru($obj)
-    {
-        return new Cacher_Slot_Thru($this, $obj);
-    }
-                                   */
-    
+  
 }
-
-########################################################################
-
-
-/**
- * Thru-caching helper class.
- */
-/*
-class Cacher_Slot_Thru
-{
-    private $_slot;
-    private $_obj; 
-    
-    public function __construct(Cacher_Frontend_Slot $slot, $obj)
-    {
-        $this->_slot = $slot;
-        $this->_obj = $obj;
-    }
-    
-    public function __call($method, $args)
-    {
-        if (false === ($result = $this->_slot->get())) {
-            if ($this->_obj) {
-                $result = call_user_func_array(array($this->_obj, $method), $args);
-            } else {
-                $result = call_user_func_array($method, $args);
-            }
-            $this->_slot->set($result);
-        }
-        return $result;
-    }
-}
-                                             */
 
 ?>

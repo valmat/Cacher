@@ -1,9 +1,7 @@
 <?php
-echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
+ echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
  require './config.php';
 
- //define('DFLT_CACHEBKND','MemReCache');
- //define('DFLT_CACHEBKND','Memcache');
 ################################################################################
 /**
   *   __autoload
@@ -24,8 +22,6 @@ echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
  /*
   * class User
   */
-//echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
-
  class User {
     
     public $id;
@@ -33,16 +29,6 @@ echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
         $this->id = $id;
     }
  }
-//echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
-/*
- Cacher::Slot('User',new User);
-
- Cacher::newTag('SmplTag',15);
-
-echo '<hr><pre>';
-var_export(Cacher::$Backand_avaible);
-echo '</pre><hr>';
-*/
 /*
     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Пример использования:
@@ -112,7 +98,7 @@ $memcache->connect('unix:///tmp/memcached.socket', 0);
     
     //Cacher::newTag('AniTagData2',AniTagDataObj1)->clear()        // Очищаем кеш тега
 
-echo '<hr>Кеширование объекта:<pre>';
+echo '<hr>Кешированый объект:<pre>';
 var_export($CacheData);
 echo '</pre><hr>';
 
