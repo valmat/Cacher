@@ -36,8 +36,8 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
     
     private static $memcache=null;
     
-    const MC_HOST = 'unix:///tmp/memcached.socket';
-    const MC_PORT = 0;
+    const MC_HOST = MEMCACHE_HOST;
+    const MC_PORT = MEMCACHE_PORT;
     const NAME    = 'Memcache';
     const COMPRES = false;//MEMCACHE_COMPRESSED;
     

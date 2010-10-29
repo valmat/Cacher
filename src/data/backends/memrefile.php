@@ -41,8 +41,8 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
     
     private static $memcache=null;
     
-    const MC_HOST   = 'unix:///tmp/memcached.socket';
-    const MC_PORT   = 0;
+    const MC_HOST   = MEMCACHE_HOST;
+    const MC_PORT   = MEMCACHE_PORT;
     const NAME      = 'MemReFile';
     /**
       * сжатие memcache
@@ -51,37 +51,37 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
     /**
       * Префикс для формирования ключа блокировки
       */
-    const LOCK_PREF = '~lock';
+    const LOCK_PREF = CACHER_BK_MEMREFILE_LOCK_PREF;
     /**
       * Время жизни ключа блокировки. Если во время перестроения кеша процесс аварийно завершится,
       * то блокировка останется включенной и другие процессы будут продолжать выдавать протухший кеш LOCK_TIME секунд.
       * С другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состояние гонки и блокировочный механизм перестанет работать.
       * Т.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
       */
-    const LOCK_TIME = 7;
+    const LOCK_TIME = CACHER_BK_MEMREFILE_LOCK_TIME;
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
-    const MAX_LTIME = 2505600;
+    const MAX_LTIME = CACHER_BK_MEMREFILE_MAX_LTIME;
     /**
       * EXPIRE PREFIX - префикс для хранения ключа со временем истечения кеша
       */
-    const EXPR_PREF = '~xpr';
+    const EXPR_PREF = CACHER_BK_MEMREFILE_EXPR_PREF;
     
     /**
       * CACHE PATH - Путь к дериктории хранения кеша
       */
-    const CACHE_PATH = '/tmp/safecache/';
+    const CACHE_PATH = CACHER_BK_MEMREFILE_C_PATH;
 
     /**
       * TMP PATH - Путь к папке со временными файлами
       */
-    const TMP_PATH = '/tmp';
+    const TMP_PATH   = CACHER_BK_MEMREFILE_TMP_PATH;
     
     /**
       * CACHE EXTENTION - Расширение для файлов кеша
       */
-    const CACHE_EXT = '.cache';
+    const CACHE_EXT  = CACHER_BK_MEMREFILE_C_EXT;
     
     /**
       * Флаг установленной блокировки

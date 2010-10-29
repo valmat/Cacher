@@ -33,28 +33,32 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
     
     private static $memcache=null;
     
-    const MC_HOST   = 'unix:///tmp/memcached.socket';
-    const MC_PORT   = 0;
+    const MC_HOST   = MEMCACHE_HOST;
+    const MC_PORT   = MEMCACHE_PORT;
     const NAME      = 'MemReCache0';
+    
     /**
       * сжатие memcache
       */
     const COMPRES   = false;//MEMCACHE_COMPRESSED;
+    
     /**
       * ѕрефикс дл€ формировани€ ключа блокировки
       */
-    const LOCK_PREF = '~lock';
+    const LOCK_PREF = CACHER_BK_MEMRECACHE0_LOCK_PREF;
+    
     /**
       * ¬рем€ жизни ключа блокировки. ≈сли во врем€ перестроени€ кеша процесс аварийно завершитс€,
       * то блокировка останетс€ включенной и другие процессы будут продолжать выдавать протухший кеш LOCK_TIME секунд.
       * — другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состо€ние гонки и блокировочный механизм перестанет работать.
       * “.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
       */
-    const LOCK_TIME = 7;
+    const LOCK_TIME = CACHER_BK_MEMRECACHE0_LOCK_TIME;
+    
     /**
       * MAX_LifeTIME - максимальное врем€ жизни кеша. ѕо умолчанию 29 дней. ≈сли методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
-    const MAX_LTIME = 2505600;
+    const MAX_LTIME = CACHER_BK_MEMRECACHE0_MAX_LTIME;
     
     /**
       * ‘лаг установленной блокировки
