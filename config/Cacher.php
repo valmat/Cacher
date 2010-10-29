@@ -1,17 +1,16 @@
 <?php
-################################################################################
-/**
+/*******************************************************************************
   *  [Cacher]
   *  config for class  Cacher
   */
 
-    define('CACHER_PATH_TAGS',     $RootPath . '/classdata/cacher/tags.php');
-    define('CACHER_PATH_SLOTS',    $RootPath . '/classdata/cacher/slots.php');
-    define('CACHER_PATH_BACKENDS', $RootPath . '/classdata/cacher/backends/');
+    define('CACHER_PATH_TAGS',     './src/data/tags.php');
+    define('CACHER_PATH_SLOTS',    './src/data/slots.php');
+    define('CACHER_PATH_BACKENDS', './src/data/backends/');
 
     # NameSpase prefix for cache key 
     define('CACHER_NAME_SPACE', 'dflt' );
-    
+
     
     /*
      * Пронстранство имен типов кеширования. Создано в такой упрощенной форме, для экономии системных ресурсов

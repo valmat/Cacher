@@ -1,22 +1,16 @@
 <?php
  echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Κα<br>';
- require './config/config.php';
+ require './config/Cacher.php';
+ require './config/Cacher_Backendds.php';
+ require './config/base.php';
 
 ################################################################################
 /**
   *   __autoload
   */
    function __autoload($ClassName){
-       //require_once PATH_CLASS.'/class.'.strtolower($ClassName).'.php';
        require './src/class.'.strtolower($ClassName).'.php';
     }
-    
- //echo  Cacher::name('test');
-
- 
- //echo  SimplTempl::Plug('test',0,5);
- //echo  SimplTempl::Plug('test1');
-
 ################################################################################
 
  /*
