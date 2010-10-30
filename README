@@ -1,0 +1,52 @@
+Description page: http://www.valmat.ru/2010/10/php-cacher.html
+Github: http://github.com/valmat/Cacher
+License: GPL v.3  http://www.gnu.org/licenses/gpl.txt
+
+Minimal version PHP: 5.2.1
+In some cases (for some backend) need memcache
+
+
+Comment language: Russian
+========================================
+	*	Motivation
+
+Create simple and powerful caching module with clear logic. To work on a single server, but at the same time, the highloaded project. 
+With the ability to change the strategy of cashing in on the current load level of the project.
+
+	*	Architecture
+
+The main logical units are:
+    * Cacher - front to caching classes.
+    * Cacher_Backend - actually own caching classes.
+    * Slots - caching and access to the cache via the slots.
+    * Tags - to simplify the management of cache, and mainly for recaching.
+    * Types of caching - for transparent caching strategy changes. Ie specific caching backend, via the slot (or tag), which in turn operate types. 
+
+	*	Using
+
+class Cacher
+Requires a class inherits an interface Cacher_Backend - a family of classes that implement the backend class Cacher 
+All operations with the cache is carried out at a lower level through the backends.
+Backend can be a file system, shared memory, memcache, Sqlite, and other cacheing system.
+
+
+	*	Example:
+
+
+Cacher::Slot('AniObj',AniObj);
+
+//Get data
+if (false === ($CacheData = Cacher::get())) {
+	$CacheData = GetFromAnyExternal();
+	Cacher::addTag(Cacher::newTag('AniTagData',AniTagDataObj));
+	$tag2 = Cacher::newTag('AniTagData2',AniTagDataObj1)
+	Cacher::addTag($tag2);
+	Cacher::set($CacheData);
+}
+ ...
+ ...
+ If you then need to reset some a tag, you will need to do so: 
+ Cacher::newTag('AniTagData2',AniTagDataObj1)->clear() // Clear cache of tag
+
+------------------
+More details on the Russian: http://www.valmat.ru/2010/10/php-cacher.html
