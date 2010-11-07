@@ -24,5 +24,16 @@
        
        //Cacher::_setOption($Backend,$LifeTime,$key); 
     }
+        
+    function Cacher_Slot_User1(User1 $arg) {
+       //echo '<hr><pre>';
+       //var_export('Cacher::_setOption("Memcache", 30, '."user_{$arg->id}".');');
+       //echo '</pre><hr>';
+       
+       //Cacher::_setOption('Memcache', 20, "user_{$arg->id}");
+       Cacher::_setOption(CacheTypes::SAFE , 10, "user_{$arg->id}");
+       
+       //Cacher::_setOption($Backend,$LifeTime,$key); 
+    }    
 
 ?>

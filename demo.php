@@ -1,42 +1,4 @@
 <?php
-
-################################################################################
-$memory_get_usage_start = (memory_get_usage()/1024);
-
-function microtime_float(){
-    list($usec, $sec) = explode(" ", microtime());
-    return ((float)$usec + (float)$sec);
-   }
-
-function print_time($time_start){
-    static $cal_nom = 0;
-    $cal_nom++;
-    echo '<hr>time: '.( (microtime_float() - $time_start)*1000 )." ms ($cal_nom)<br>";
-   }
-$time_start = microtime_float();
-################################################################################ 
- 
- require './config/Cacher.php';
- require './config/Cacher_Backends.php';
- require './config/base.php';
-################################################################################
-/**
-  *   __autoload
-  */
-   function __autoload($ClassName){
-       require './src/class.'.strtolower($ClassName).'.php';
-    }
-################################################################################
- /*
-  * class User
-  */
- class User {
-    
-    public $id;
-    function __construct($id=5) {
-        $this->id = $id;
-    }
- }
 /*
     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     * Пример использования:
@@ -59,26 +21,56 @@ $time_start = microtime_float();
     * 
     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 */
+################################################################################
+$memory_get_usage_start = (memory_get_usage()/1024);
+
+function microtime_float(){
+    list($usec, $sec) = explode(" ", microtime());
+    return ((float)$usec + (float)$sec);
+   }
+
+function print_time($time_start){
+    static $cal_nom = 0;
+    $cal_nom++;
+    echo '<hr>time: '.( (microtime_float() - $time_start)*1000 )." ms ($cal_nom)<br>";
+   }
+$time_start = microtime_float();
+################################################################################ 
+ 
+ require './config/Cacher.php';
+ require './config/Cacher_Backends.php';
+ require './config/base.php';
+ 
+################################################################################
+/**
+  *   __autoload
+  */
+   function __autoload($ClassName){
+       require './src/class.'.strtolower($ClassName).'.php';
+    }
+################################################################################
+    /*
+     * class User
+     */
+    class User {
+       
+       public $id;
+       function __construct($id=5) {
+           $this->id = $id;
+       }
+    }
+
     function GetFromAnyExternal(User $User){
         return Array('username','userage'=>20, date('h:i:s A') );
     }
+    
     $User = new User();
+    print_time($time_start);
     Cacher::Slot('User',$User);
+    print_time($time_start);
     echo Cacher::$BackendName;
     
-/*
-$CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
-Cacher::addTag(Cacher::newTag('SmplTag',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-Cacher::addTag(Cacher::newTag('SmplTag1',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-Cacher::set($CacheData);
-//Cacher::newTag('SmplTag1',$User)->clear();
-exit;
-*/
-$memcache = new Memcache();
-$memcache->connect('unix:///tmp/memcached.socket', 0);
-//$memcache->set('cachecnt',0,false,(5*3600));
-//$memcache->flush();exit;
-
+    print_time($time_start);
 
 
     if (false === ($CacheData = Cacher::get()))// Если данные из кеша получить не удалось...
@@ -103,13 +95,10 @@ $memcache->connect('unix:///tmp/memcached.socket', 0);
     //Cacher::newTag('SmplTag1',$User)->clear();
     
     //Cacher::newTag('AniTagData2',AniTagDataObj1)->clear()        // Очищаем кеш тега
-
+print_time($time_start);
 echo '<hr>Кешированый объект:<pre>';
 var_export($CacheData);
 echo '</pre><hr>';
-
-//echo '<hr><pre>';var_export(get_defined_functions());echo '</pre><hr>';
-echo '<hr>'.$memcache->get('cachecnt');
 
 
 ################################################################################

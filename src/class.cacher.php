@@ -137,8 +137,7 @@ class Cacher {
      * @param $BackendName string
      */
     static public function setBackend($BackendName) {
-        if(!class_exists('Cacher_Backend_'.$BackendName,false))
-          {
+        if(!class_exists('Cacher_Backend_'.$BackendName,false)){
             require self::PATH_BACKENDS.strtolower($BackendName).'.php';
           }
         $BackendName = 'Cacher_Backend_'.$BackendName;
