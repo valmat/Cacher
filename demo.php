@@ -28,13 +28,17 @@ function microtime_float(){
     list($usec, $sec) = explode(" ", microtime());
     return ((float)$usec + (float)$sec);
    }
+global $time_start;
+$time_start = microtime_float($cmnt = '');
 
-function print_time($time_start){
+function print_time($cmnt = ''){
     static $cal_nom = 0;
+    global $time_start;
+    
     $cal_nom++;
-    echo '<hr>time: '.( (microtime_float() - $time_start)*1000 )." ms ($cal_nom)<br>";
+    echo '<hr>time: '.( (microtime_float() - $time_start)*1000 )." ms ($cal_nom) [$cmnt]<br>";
    }
-$time_start = microtime_float();
+
 ################################################################################ 
  
  require './config/Cacher.php';
@@ -65,12 +69,11 @@ $time_start = microtime_float();
     }
     
     $User = new User();
-    print_time($time_start);
+    print_time();
     Cacher::Slot('User',$User);
-    print_time($time_start);
     echo Cacher::$BackendName;
     
-    print_time($time_start);
+    print_time();
 
 
     if (false === ($CacheData = Cacher::get()))// Если данные из кеша получить не удалось...
@@ -81,11 +84,8 @@ $time_start = microtime_float();
          
          //$memcache->decrement('cachecnt');
          sleep(2);// hard data
-         $memcache->increment('cachecnt');
-         
          
          echo '<hr><font color=blue>Кешируем данные</font><hr>';
-    
            
          Cacher::set($CacheData);                                    // Кешируем данные
          
@@ -95,7 +95,7 @@ $time_start = microtime_float();
     //Cacher::newTag('SmplTag1',$User)->clear();
     
     //Cacher::newTag('AniTagData2',AniTagDataObj1)->clear()        // Очищаем кеш тега
-print_time($time_start);
+print_time();
 echo '<hr>Кешированый объект:<pre>';
 var_export($CacheData);
 echo '</pre><hr>';
@@ -105,6 +105,6 @@ echo '</pre><hr>';
 
 echo '<br>';
 echo '<hr>memory usage: '.(memory_get_usage()/1024-$memory_get_usage_start) .'Кб<br>';
-    print_time($time_start);
+    print_time();
 
 ?>

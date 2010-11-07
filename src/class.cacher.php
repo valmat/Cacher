@@ -79,17 +79,20 @@ class Cacher {
      * @param $arg
      */
     static function Slot($SlotName,$arg) {
+      print_time('in slot');
       if (!defined('CACHER_SLOT_REQUIRED'))
         require self::PATH_SLOTS;
-        
+      print_time('required Cacher_Slot_'.$SlotName);
       $SlotName = 'Cacher_Slot_'.$SlotName;
       $SlotName($arg);
+      print_time('call slot meth');
+      # clear tags array for next slot
       self::$Tags = Array();
     }
     
     /*
      * function _setOption
-     * Этот метод создан для использования в дргуе класса
+     * Этот метод создан для использования в дргуе класса (в Слоте)
      * 
      * @param $Backend Cacher_Backend
      * @param $LifeTime int
@@ -97,7 +100,9 @@ class Cacher {
      */
     static function _setOption($BackendName,$LifeTime,$key) {
         self::$BackendName = $BackendName;
+        print_time('создадим бэкенд ' . $BackendName);
         self::$Backend = self::setBackend($BackendName);
+        print_time('создали бэкенд');
         self::$LifeTime = $LifeTime;
         self::$CacheKey = self::NAME_SPACE.$key;
     }
@@ -137,9 +142,13 @@ class Cacher {
      * @param $BackendName string
      */
     static public function setBackend($BackendName) {
+        /*
         if(!class_exists('Cacher_Backend_'.$BackendName,false)){
             require self::PATH_BACKENDS.strtolower($BackendName).'.php';
           }
+        */
+        require_once self::PATH_BACKENDS.strtolower($BackendName).'.php';
+        print_time('if(!class_exists');
         $BackendName = 'Cacher_Backend_'.$BackendName;
         return new $BackendName();
     }
@@ -152,6 +161,7 @@ class Cacher {
      * @return mixed   Complex data or false if no cache entry is found.
      */
     static function get() {
+        print_time('in Cacher::get');
         return self::$Backend->get(self::$CacheKey);
     }
     
