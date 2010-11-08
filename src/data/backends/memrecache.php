@@ -34,8 +34,6 @@ class Cacher_Backend_MemReCache implements Cacher_Backend{
     
     private static $memcache=null;
     
-    const MC_HOST   = MEMCACHE_HOST;
-    const MC_PORT   = MEMCACHE_PORT;
     const NAME      = 'MemReCache';
     /**
       * сжатие memcache
@@ -71,8 +69,7 @@ class Cacher_Backend_MemReCache implements Cacher_Backend{
     
     function __construct() {
         if(null==self::$memcache){
-           self::$memcache = new Memcache;
-           self::$memcache->connect(self::MC_HOST, self::MC_PORT);
+           self::$memcache = Mcache::init();
         }
     }
     

@@ -36,16 +36,13 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
     
     private static $memcache=null;
     
-    const MC_HOST = MEMCACHE_HOST;
-    const MC_PORT = MEMCACHE_PORT;
     const NAME    = 'Memcache';
     const COMPRES = false;//MEMCACHE_COMPRESSED;
     
     
     function __construct() {
-        if(null===self::$memcache){
-           self::$memcache = new Memcache;
-           self::$memcache->connect(self::MC_HOST, self::MC_PORT);
+        if(null==self::$memcache){
+           self::$memcache = Mcache::init();
         }
     }
 
