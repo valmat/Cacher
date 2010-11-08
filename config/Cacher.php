@@ -7,7 +7,8 @@
 
     define('CACHER_PATH_TAGS',     './src/data/tags.php');
     define('CACHER_PATH_SLOTS',    './src/data/slots.php');
-    define('CACHER_PATH_BACKENDS', './src/data/backends/');
+    define('CACHER_PATH_BACKENDS', './src/data/cache_strategy/');
+    define('CACHER_TAG_BACKENDS',  './src/data/tag_strategy/');
 
     # NameSpase prefix for cache key 
     define('CACHER_NAME_SPACE', 'dflt' );

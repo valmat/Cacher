@@ -171,7 +171,7 @@ class Cacher {
      * 
      * function set
      * @param mixed $val  Data to be saved.
-     * @return bool -у спешность операции
+     * @return bool - успешность операции
      */
     static function set($val) {
         //return self::$LastSlot->set($val);
