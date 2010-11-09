@@ -63,20 +63,6 @@ abstract class Cacher_Tag
     private function __construct(){}
     
     /**
-     * Get tag key without create tag object
-     * Usege for add tag key in cacher slot
-     * @return string   Cacher Tag Key
-     * @param $arg      mixed arg for tag create
-     * @param $TagName  string name of tag
-     */
-    final static function tagKey($TagName, $arg){
-        if (!defined('CACHER_TAG_REQUIRED'))
-          require self::PATH_TAGS;
-        
-        return self::NAME_SPACE . call_user_func('Cacher_Tag_'.$TagName.'::setKey', $arg);
-    }
-    
-    /**
      * Clears all caches associated to this tags.
      * @param void
      * @return void
