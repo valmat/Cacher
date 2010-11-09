@@ -82,10 +82,9 @@ function print_time($cmnt = ''){
     if (false === ($CacheData = Cacher::get()))// Если данные из кеша получить не удалось...
     { 
          $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
-         Cacher::addTag(Cacher::newTag('SmplTag',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-         Cacher::addTag(Cacher::newTag('SmplTag1',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         //Cacher::addTag(Cacher::newTag('SmplTag',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         //Cacher::addTag(Cacher::newTag('SmplTag1',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
          
-         //$memcache->decrement('cachecnt');
          sleep(2);// hard data
          
          echo '<hr><font color=blue>Кешируем данные</font><hr>';

@@ -106,20 +106,7 @@ class Cacher {
         self::$LifeTime = $LifeTime;
         self::$CacheKey = self::NAME_SPACE.$key;
     }
-
-    /*
-     * Создает новый тег и возвращает ссылку на созданный объект
-     * function newTag
-     * @param $arg
-     */
-    static function newTag($TagName,$arg) {
-      if (!defined('CACHER_TAG_REQUIRED'))
-        require self::PATH_TAGS;
-      
-      $TagName = 'Cacher_Tag_'.$TagName;
-      return new $TagName($arg);
-    }
-    
+  
     /**
      * Добавляет тег к слоту
      * 
