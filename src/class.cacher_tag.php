@@ -28,13 +28,13 @@ abstract class Cacher_Tag
      *  Backend object responsible for this cache tag.
      *  @var Cacher_Backend
      */
-    protected   $Backend = null;
+    private   $Backend = null;
   
     /**
      * Calculated ID associated to this Tag
      * @var string
      */
-    protected $tagkey = null;
+    private $tagkey = null;
 
     /**
      * Creates a new Tag object.
@@ -45,12 +45,20 @@ abstract class Cacher_Tag
      * @param $arg      mixed arg for tag create
      * @param $TagName  string name of tag
      */
-    static function create($TagName, $arg){
+    final static function create($TagName, $arg){
         if (!defined('CACHER_TAG_REQUIRED'))
           require self::PATH_TAGS;
         
         $TagName = 'Cacher_Tag_'.$TagName;
-        return new $TagName($arg);        
+        //return new $TagName($arg);
+        $newTag = new $TagName($TagName, $arg);
+        $newTag->tagkey = self::NAME_SPACE . call_user_func($TagName.'::setKey', $arg);
+        
+        echo "<hr>newTag:<pre>";
+        var_export($newTag);
+        echo "<hr></pre>";
+        
+        return $newTag;
     }
     
     /**
@@ -59,10 +67,14 @@ abstract class Cacher_Tag
      * @return Cacher_Tag
      * @param $arg mixed
      */
-    public function __construct(&$arg){
-        $this->tagkey = self::setKey($arg);
-        //$this->tagkey = self::NAME_SPACE . $tagkey;
-        //$this->getKey();
+    private function __construct(){
+    //private function __construct($TagName, $arg){
+        //$this->tagkey = self::NAME_SPACE . self::setKey($arg);
+        //$newTag->tagkey = self::NAME_SPACE . $this->setKey($arg);
+        echo "<hr><pre>",'private function __construct';
+        var_export(func_get_args());
+        echo "<hr></pre>";
+        //$this->tagkey = self::NAME_SPACE . call_user_func($TagName.'::setKey', $arg);
     }
     
     /**
@@ -72,11 +84,11 @@ abstract class Cacher_Tag
      * @param $arg      mixed arg for tag create
      * @param $TagName  string name of tag
      */
-    static function tagKey($TagName, $arg){
+    final static function tagKey($TagName, $arg){
         if (!defined('CACHER_TAG_REQUIRED'))
           require self::PATH_TAGS;
         
-        return call_user_func('Cacher_Tag_'.$TagName.'::setKey', $arg);
+        return self::NAME_SPACE . call_user_func('Cacher_Tag_'.$TagName.'::setKey', $arg);
     }
     
     /**
@@ -84,7 +96,7 @@ abstract class Cacher_Tag
      * @param void
      * @return void
      */
-    public function clear(){
+    final public function clear(){
         return $this->getBackend()->clearTag($this->tagkey);
     }
     
@@ -93,7 +105,7 @@ abstract class Cacher_Tag
      * @param void
      * @return void
      */
-    public function getKey(){
+    final public function getKey(){
         return $this->tagkey;
     }    
 
@@ -115,10 +127,10 @@ abstract class Cacher_Tag
     
     /*
      * abstract function setKey
-     * @param void
+     * @param object
      * @return string tag key
      */
-    abstract function setKey($var);
+    abstract static function setKey($var);
     
     /*
      * abstract function getBkName
@@ -126,7 +138,7 @@ abstract class Cacher_Tag
      * @param void
      * @return string Tag Backend name
      */
-    abstract function getBkName();
+    abstract static function getBkName();
 
 }
 

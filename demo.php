@@ -66,6 +66,8 @@ function print_time($cmnt = ''){
            $this->id = $id;
        }
     }
+    
+    
 
     function GetFromAnyExternal(User $User){
         return Array('username','userage'=>20, date('h:i:s A') );
@@ -82,10 +84,13 @@ function print_time($cmnt = ''){
     if (false === ($CacheData = Cacher::get()))// Если данные из кеша получить не удалось...
     { 
          $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
-         //Cacher::addTag(Cacher::newTag('SmplTag',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-         //Cacher::addTag(Cacher::newTag('SmplTag1',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         //Cacher::addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         //Cacher::addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         print_time('<h1>new tag:</h1>');
+         Cacher_Tag::create('SmplTag1', $User);
+         print_time('<h1>:end new tag</h1>');
          
-         sleep(2);// hard data
+         sleep(1);// hard data
          
          echo '<hr><font color=blue>Кешируем данные</font><hr>';
            

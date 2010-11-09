@@ -115,10 +115,15 @@ class Cacher {
      */
     public function addTag(Cacher_Tag $tag)
     {
-        if ($tag->BackendName !== self::$BackendName) {
+        if ($tag->getBkName() !== self::$BackendName) {
             trigger_error('Backends for tag ' . get_class($tag) . ' and slot ' . get_class($this) . ' must be same', E_USER_WARNING);
         }
-        self::$Tags[] = $tag;
+        self::$Tags[] = $tag->getKey();
+        echo "<hr><pre>";
+        var_export($tag);
+        echo "<hr></pre>";
+        
+        
     }
     
     /*
@@ -165,9 +170,11 @@ class Cacher {
         
         $tags = array();
         $tagCnt = count(self::$Tags);
+/*
         for($i=0;$i<$tagCnt;$i++){
-            $tags[] = self::$Tags[$i]->getVal();
+            $tags[] = self::$Tags[$i]->getKey();
         }
+*/
         return self::$Backend->set(self::$CacheKey, $val, $tags, self::$LifeTime);
         
     }
