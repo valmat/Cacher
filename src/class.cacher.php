@@ -31,7 +31,6 @@
 
 class Cacher {
     
-    const PATH_TAGS     = CACHER_PATH_TAGS;
     const PATH_SLOTS    = CACHER_PATH_SLOTS;
     const PATH_BACKENDS = CACHER_PATH_BACKENDS;
     

@@ -2,6 +2,8 @@
 
 /**
  * интерфейс для тегов кеширования.
+ * Создание тега:
+ * Cacher_Tag::create($tagname,$tagObjDefiner);
  * 
  */
  
