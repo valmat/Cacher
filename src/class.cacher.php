@@ -113,17 +113,13 @@ class Cacher {
      * @param Cacher_Tag $tag   Tag object to associate.
      * @return void
      */
-    public function addTag(Cacher_Tag $tag)
-    {
-        if ($tag->getBkName() !== self::$BackendName) {
-            trigger_error('Backends for tag ' . get_class($tag) . ' and slot ' . get_class($this) . ' must be same', E_USER_WARNING);
+    public function addTag(Cacher_Tag $tag) {
+        if ($tag->getBkName() == self::$BackendName) {
+            self::$Tags[] = $tag->getKey();
+            return true;
         }
-        self::$Tags[] = $tag->getKey();
-        echo "<hr><pre>";
-        var_export($tag);
-        echo "<hr></pre>";
-        
-        
+        trigger_error('Backends for tag ' . get_class($tag) . ' and slot ' . get_class($this) . ' must be same', E_USER_WARNING);
+        return false;
     }
     
     /*

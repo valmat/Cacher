@@ -38,8 +38,9 @@ abstract class Cacher_Tag
 
     /**
      * Creates a new Tag object.
-     * —оздатель тегов кешировани€. Factory method
-     * ÷ель: вынести операцию создани€ тега из класса Cacher, так как в этом случае дл€ создани€ каждого тега создаетс€ экземпл€р кеширующего бекенда
+     * —оздатель тегов кешировани€. Factory method, Templated method
+     * ÷ель: вынести операцию создани€ тега из класса Cacher,
+     * так как в этом случае дл€ создани€ каждого тега создаетс€ экземпл€р кеширующего бекенда
      * —оздает экземпл€р потомка класса Cacher_Tag
      * @return Cacher_Tag
      * @param $arg      mixed arg for tag create
@@ -50,32 +51,16 @@ abstract class Cacher_Tag
           require self::PATH_TAGS;
         
         $TagName = 'Cacher_Tag_'.$TagName;
-        //return new $TagName($arg);
-        $newTag = new $TagName($TagName, $arg);
+        $newTag = new $TagName();
         $newTag->tagkey = self::NAME_SPACE . call_user_func($TagName.'::setKey', $arg);
-        
-        echo "<hr>newTag:<pre>";
-        var_export($newTag);
-        echo "<hr></pre>";
-        
         return $newTag;
     }
     
     /**
-     * Creates a new Tag object
-     * Templated method
-     * @return Cacher_Tag
-     * @param $arg mixed
+     * private constructor
+     * for create object use Cacher_Tag::create()
      */
-    private function __construct(){
-    //private function __construct($TagName, $arg){
-        //$this->tagkey = self::NAME_SPACE . self::setKey($arg);
-        //$newTag->tagkey = self::NAME_SPACE . $this->setKey($arg);
-        echo "<hr><pre>",'private function __construct';
-        var_export(func_get_args());
-        echo "<hr></pre>";
-        //$this->tagkey = self::NAME_SPACE . call_user_func($TagName.'::setKey', $arg);
-    }
+    private function __construct(){}
     
     /**
      * Get tag key without create tag object
@@ -134,7 +119,6 @@ abstract class Cacher_Tag
     
     /*
      * abstract function getBkName
-     * 
      * @param void
      * @return string Tag Backend name
      */

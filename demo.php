@@ -85,10 +85,9 @@ function print_time($cmnt = ''){
     { 
          $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
          //Cacher::addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-         //Cacher::addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-         print_time('<h1>new tag:</h1>');
-         Cacher_Tag::create('SmplTag1', $User);
-         print_time('<h1>:end new tag</h1>');
+         Cacher::addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         
+         //Cacher_Tag::create('SmplTag1', $User);
          
          sleep(1);// hard data
          
