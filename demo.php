@@ -87,7 +87,7 @@ function print_time($cmnt = ''){
          //Cacher::addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
          Cacher::addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
          
-         //Cacher_Tag::create('SmplTag1', $User);
+         //Cacher_Tag::create('SmplTag1', $User)->getKey();
          
          sleep(1);// hard data
          

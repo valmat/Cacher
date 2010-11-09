@@ -88,7 +88,7 @@ abstract class Cacher_Tag
      */
     private function getBackend(){
         if(null==$this->Backend){
-            $BackendName = self::getBkName();
+            $BackendName = $this->getBkName();
             require_once self::TAG_BACKENDS.'tag_'.strtolower($BackendName).'.php';
             $BackendName = 'Cache_Tag_Backend_'.$BackendName;
             $this->Backend = new $BackendName();
