@@ -94,7 +94,7 @@ final class Cacher {
     
     /*
      * function _setOption
-     * Этот метод создан для использования в дргуе класса (в Слоте)
+     * Этот метод создан для использования в в Слоте
      * 
      * @param $Backend Cacher_Backend
      * @param $LifeTime int
@@ -129,7 +129,7 @@ final class Cacher {
      * function setBackend
      * @param $BackendName string
      */
-    public function setBackend($BackendName) {
+    static function setBackend($BackendName) {
         /*
         if(!class_exists('Cacher_Backend_'.$BackendName,false)){
             require self::PATH_BACKENDS.strtolower($BackendName).'.php';
@@ -160,17 +160,7 @@ final class Cacher {
      * @return bool - успешность операции
      */
     public function set($val) {
-        //return $this->LastSlot->set($val);
-        
-        $tags = array();
-        $tagCnt = count($this->Tags);
-/*
-        for($i=0;$i<$tagCnt;$i++){
-            $tags[] = $this->Tags[$i]->getKey();
-        }
-*/
-        return $this->Backend->set($this->CacheKey, $val, $tags, $this->LifeTime);
-        
+        return $this->Backend->set($this->CacheKey, $val, $this->Tags, $this->LifeTime);
     }
 
     /*
