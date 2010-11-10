@@ -75,17 +75,18 @@ function print_time($cmnt = ''){
     
     $User = new User();
     print_time();
-    Cacher::Slot('User',$User);
-    echo Cacher::$BackendName;
+    //Cacher::Slot('User',$User);
     
+    $slot = Cacher::create('User',$User);
+
     print_time();
 
 
-    if (false === ($CacheData = Cacher::get()))// Если данные из кеша получить не удалось...
+    if (false === ($CacheData = $slot->get()))// Если данные из кеша получить не удалось...
     { 
          $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
-         //Cacher::addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-         Cacher::addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         $slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
          
          //Cacher_Tag::create('SmplTag1', $User)->getKey();
          
@@ -93,10 +94,10 @@ function print_time($cmnt = ''){
          
          echo '<hr><font color=blue>Кешируем данные</font><hr>';
            
-         Cacher::set($CacheData);                                    // Кешируем данные
+         $slot->set($CacheData);                                    // Кешируем данные
          
      }
-    //Cacher::del();
+    //$slot->del();
     //Cacher::newTag('SmplTag',$User)->clear();
     //Cacher::newTag('SmplTag1',$User)->clear();
     
