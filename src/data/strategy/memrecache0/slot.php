@@ -84,10 +84,6 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
         return $this->is_locked;
     }
     
-    function clearTag($tagKey){
-        self::$memcache->set($tagKey, time(), false, 0 );
-    }
-    
     function get($CacheKey){
         # если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===($cobj = self::$memcache->get($CacheKey)) )
