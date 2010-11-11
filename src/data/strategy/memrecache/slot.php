@@ -30,7 +30,7 @@
  * 
  */
 
-class Cacher_Backend_MemReCache implements Cacher_Backend{
+class Cacher_Backend_MemReCache implements Cacher_Backend {
     
     private static $memcache=null;
     

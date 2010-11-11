@@ -1,14 +1,16 @@
 <?php
 
 /*
- * class Cache_Tag_Backend_MemReCache
+ * class Cache_Tag_Backend_MemReFile
  * 
  */
 
-class Cache_Tag_Backend_MemReCache implements Cache_Tag_Backend {
+class Cache_Tag_Backend_MemReFile implements Cache_Tag_Backend {
     
     private static $memcache=null;
     
+    const NAME      = 'MemReFile';
+
     function __construct() {
         if(null==self::$memcache){
            self::$memcache = Mcache::init();
@@ -18,7 +20,7 @@ class Cache_Tag_Backend_MemReCache implements Cache_Tag_Backend {
     function clearTag($tagKey){
         self::$memcache->set($tagKey, time(), false, 0 );
     }
-
+    
 }
 
 ?>

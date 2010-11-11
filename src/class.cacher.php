@@ -100,7 +100,7 @@ final class Cacher {
      * @param $LifeTime int
      * @param $key string
      */
-    public function _setOption($BackendName,$LifeTime,$key) {
+    public function _setOption($BackendName, $LifeTime, $key) {
         $this->BackendName = $BackendName;
         $this->Backend = self::setBackend($BackendName);
         $this->LifeTime = $LifeTime;
