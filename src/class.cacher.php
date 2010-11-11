@@ -135,7 +135,7 @@ final class Cacher {
             require self::PATH_BACKENDS.strtolower($BackendName).'.php';
           }
         */
-        require_once self::PATH_BACKENDS.strtolower($BackendName).'.php';
+        require_once self::PATH_BACKENDS . strtolower($BackendName) . '/slot.php';
         $BackendName = 'Cacher_Backend_'.$BackendName;
         return new $BackendName();
     }

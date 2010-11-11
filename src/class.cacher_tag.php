@@ -19,7 +19,7 @@ abstract class Cacher_Tag
     /**
      *  Path to Tags backends
      */
-    const  TAG_BACKENDS = CACHER_TAG_BACKENDS;
+    const  PATH_BACKENDS = CACHER_PATH_BACKENDS;
 
     /**
      *  Path to Tags definitions 
@@ -91,7 +91,7 @@ abstract class Cacher_Tag
     private function getBackend(){
         if(null==$this->Backend){
             $BackendName = $this->getBkName();
-            require_once self::TAG_BACKENDS.'tag_'.strtolower($BackendName).'.php';
+            require_once self::PATH_BACKENDS . strtolower($BackendName) . '/tag.php';
             $BackendName = 'Cache_Tag_Backend_'.$BackendName;
             $this->Backend = new $BackendName();
         }

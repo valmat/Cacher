@@ -1,18 +1,25 @@
 <?php
 ################################################################################
 /**
+  *  [Cacher_Tag]
+  *  config for class  Cacher_Tag
+  */
+
+    # NameSpase prefix for tag key
+    define('CACHER_TAG_NAME_SPACE', 'dflt_k' );
+
+################################################################################
+/**
   *  [Cacher]
   *  config for class  Cacher
   */
 
-    define('CACHER_PATH_TAGS',     './src/data/tags.php');
-    define('CACHER_PATH_SLOTS',    './src/data/slots.php');
-    define('CACHER_PATH_BACKENDS', './src/data/cache_strategy/');
-    define('CACHER_TAG_BACKENDS',  './src/data/tag_strategy/');
-
     # NameSpase prefix for cache key 
     define('CACHER_NAME_SPACE', 'dflt' );
 
+    define('CACHER_PATH_TAGS',     './src/data/tags.php');
+    define('CACHER_PATH_SLOTS',    './src/data/slots.php');
+    define('CACHER_PATH_BACKENDS', './src/data/strategy/');
     
     /***************************************************************************
      * Пронстранство имен типов кеширования. Создано в такой упрощенной форме, для экономии системных ресурсов

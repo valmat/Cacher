@@ -31,7 +31,7 @@
        //echo '</pre><hr>';
        
        //Cacher::_setOption('Memcache', 20, "user_{$arg->id}");
-       $self->_setOption(CacheTypes::SAFE , 10, "user_{$arg->id}");
+       $self->_setOption(CacheTypes::FAST , 10, "user_{$arg->id}");
        
        //Cacher::_setOption($Backend,$LifeTime,$key); 
     }    

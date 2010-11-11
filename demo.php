@@ -43,7 +43,7 @@ function print_time($cmnt = ''){
  
  require './config/Cacher.php';
  require './config/Cacher_Backends.php';
- require './config/CacherTag.php';
+ //require './config/CacherTag.php';
  require './config/base.php';
  
  
@@ -81,10 +81,10 @@ function print_time($cmnt = ''){
     if (false === ($CacheData = $slot->get()))// ≈сли данные из кеша получить не удалось...
     { 
          $CacheData = GetFromAnyExternal($User);        // ѕолучаем данные из внешнего хранилища
-         //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // —оздаем и сразуже добавл€ем новый тег к слоту перед сохрананеием в кеш
+         $slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // —оздаем и сразуже добавл€ем новый тег к слоту перед сохрананеием в кеш
          $slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // —оздаем и сразуже добавл€ем новый тег к слоту перед сохрананеием в кеш
          
-         //Cacher_Tag::create('SmplTag1', $User)->getKey();
+         Cacher_Tag::create('SmplTag', $User)->getKey();
          
          sleep(1);// hard data
          
