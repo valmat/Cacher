@@ -47,15 +47,6 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
     }
 
     /*
-     * Очистка кеша по тегу
-     * function clearTag
-     * @param $tagKey string
-     */
-    function clearTag($tagKey){
-        self::$memcache->set($tagKey, time(), false, 0 );
-    }
-
-    /*
      * Получение кеша
      * function get
      * @param $CacheKey string
