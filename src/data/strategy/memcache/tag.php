@@ -5,7 +5,7 @@
  * 
  */
 
-class Cacher_Backend_Memcache  implements Cacher_Backend{
+class Cache_Tag_Backend_Memcache  implements Cache_Tag_Backend{
     
     private static $memcache=null;
 

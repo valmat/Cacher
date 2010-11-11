@@ -94,7 +94,9 @@ function print_time($cmnt = ''){
          
      }
     //$slot->del();
-    //Cacher::newTag('SmplTag',$User)->clear();
+    
+    //Cacher_Tag::create('SmplTag',$User)->clear();
+    
     //Cacher::newTag('SmplTag1',$User)->clear();
     
     //Cacher::newTag('AniTagData2',AniTagDataObj1)->clear()        // Очищаем кеш тега
