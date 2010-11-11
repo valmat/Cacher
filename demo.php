@@ -74,13 +74,9 @@ function print_time($cmnt = ''){
     }
     
     $User = new User();
-    print_time();
     //Cacher::Slot('User',$User);
     
     $slot = Cacher::create('User',$User);
-
-    print_time();
-
 
     if (false === ($CacheData = $slot->get()))// Если данные из кеша получить не удалось...
     { 
@@ -102,7 +98,6 @@ function print_time($cmnt = ''){
     //Cacher::newTag('SmplTag1',$User)->clear();
     
     //Cacher::newTag('AniTagData2',AniTagDataObj1)->clear()        // Очищаем кеш тега
-print_time();
 echo '<hr>Кешированый объект:<pre>';
 var_export($CacheData);
 echo '</pre><hr>';
@@ -112,6 +107,6 @@ echo '</pre><hr>';
 
 echo '<br>';
 echo '<hr>memory usage: '.(memory_get_usage()/1024-$memory_get_usage_start) .'Кб<br>';
-    print_time();
+    print_time('end script work');
 
 ?>

@@ -20,10 +20,7 @@
        //echo '</pre><hr>';
        
        //Cacher::_setOption('Memcache', 20, "user_{$arg->id}");
-       print_time('in Cacher_Slot_User');
        $self->_setOption(CacheTypes::FAST , 10, "user_{$arg->id}");
-       print_time('Cacher::_setOption');
-       
        
        //Cacher::_setOption($Backend,$LifeTime,$key); 
     }
