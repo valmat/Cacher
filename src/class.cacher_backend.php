@@ -7,12 +7,6 @@
 
 interface Cacher_Backend
  {
-     /*
-     * ќчишает кеш по тегу
-     * function clearTag
-     * @param $tagKey   string
-     */
-    function clearTag($tagKey);
     /*
      * ѕолучить значение кеша если есть, или false, если отсутствует.
      * function get

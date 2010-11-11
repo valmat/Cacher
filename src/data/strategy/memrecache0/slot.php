@@ -1,87 +1,62 @@
 <?php
 
 /*
- * class Cacher_Backend_MemReFile
+ * class Cacher_Backend_MemReCache0
  * 
- * Бэкенд класса Cacher для кеширования в memcache и в файловой системе c безопасным перекешированием.
- * Для перекеширования используются блокировки на memcache.
+ * Бэкенд класса Cacher для кеширования в memcache c безопасным перекешированием.
+ * Для перекеширования используются блокировки.
  * Таким образом исключается состаяние гонки и обновлением кеша занимается только один процесс.
  * Тем временем другие процессы временно используют устаревший кеш.
  * Как и в Cacher_Backend_Memcache используются теги.
  * К кешируемому объекту добавляется параметр 'expire'. таким образом за истечением срока годности кеша должен следить не memcache,
  * а сам класс.
- * В отличии от Cacher_Backend_MemReCache0 в данном классе при удалении кеша по ключу происходит не фактическое удаление кеша на уравне
- * Memcache, а лишь сброс параметра Expire. За счет этого возможен сброс кеша без использования тегов с возможностью безгоночного перекеширования
- * Каждый ключ кеша дублируется в файловой системе.
- * За счет этого не тратятся ресурсы на разогрев кеша в случае его потери в виртуальной памяти или врезультате ребута.
- * Кеширование в фаловой системе устроено самым примитивным образом, что бы мнимизировать нарузку на сервер.
- * То есть кеш читается из файла только, если потерян кеш в памяти (конкретно в memcache)
- * Для обновления файлового кеша вместо блокировки (которая помсути избыточна) используется атомарная функция rename()
+ * В данном бекенде удаление по ключу происходит безусловно. То есть. после вызова del перекеширование не возможно.
+ * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *  CacheObj(in Memcache):
+ *  CacheObj:
  *  'cache_key'=Array(
- *        'data' => <cached data>
+ *      'expire' => ...
+ *        'data' => ...
  *        'tags' => Array(
  *                       'tag1' => ...,
  *                       'tag2' => ...,
  *                       'tag3' => ...
  *                       )
  *                  );
- *  CacheObj(in File):
- *  <cached data>
  * LockFlag:
- * '~lock'.'cache_key' = true/false
- * Expire:
- * '~xpr'.'cache_key' = ...
+ * '~lock'.'cache_key' = 1
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * 
  */
 
-class Cacher_Backend_MemReFile implements Cacher_Backend{
+class Cacher_Backend_MemReCache0 implements Cacher_Backend{
     
     private static $memcache=null;
     
-    const MC_HOST   = MEMCACHE_HOST;
-    const MC_PORT   = MEMCACHE_PORT;
-    const NAME      = 'MemReFile';
+    const NAME      = 'MemReCache0';
+    
     /**
       * сжатие memcache
       */
     const COMPRES   = false;//MEMCACHE_COMPRESSED;
+    
     /**
       * Префикс для формирования ключа блокировки
       */
-    const LOCK_PREF = CACHER_BK_MEMREFILE_LOCK_PREF;
+    const LOCK_PREF = CACHER_BK_MEMRECACHE0_LOCK_PREF;
+    
     /**
       * Время жизни ключа блокировки. Если во время перестроения кеша процесс аварийно завершится,
       * то блокировка останется включенной и другие процессы будут продолжать выдавать протухший кеш LOCK_TIME секунд.
       * С другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состояние гонки и блокировочный механизм перестанет работать.
       * Т.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
       */
-    const LOCK_TIME = CACHER_BK_MEMREFILE_LOCK_TIME;
+    const LOCK_TIME = CACHER_BK_MEMRECACHE0_LOCK_TIME;
+    
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
-    const MAX_LTIME = CACHER_BK_MEMREFILE_MAX_LTIME;
-    /**
-      * EXPIRE PREFIX - префикс для хранения ключа со временем истечения кеша
-      */
-    const EXPR_PREF = CACHER_BK_MEMREFILE_EXPR_PREF;
-    
-    /**
-      * CACHE PATH - Путь к дериктории хранения кеша
-      */
-    const CACHE_PATH = CACHER_BK_MEMREFILE_C_PATH;
-
-    /**
-      * TMP PATH - Путь к папке со временными файлами
-      */
-    const TMP_PATH   = CACHER_BK_MEMREFILE_TMP_PATH;
-    
-    /**
-      * CACHE EXTENTION - Расширение для файлов кеша
-      */
-    const CACHE_EXT  = CACHER_BK_MEMREFILE_C_EXT;
+    const MAX_LTIME = CACHER_BK_MEMRECACHE0_MAX_LTIME;
     
     /**
       * Флаг установленной блокировки
@@ -93,8 +68,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
     
     function __construct() {
         if(null==self::$memcache){
-           self::$memcache = new Memcache;
-           self::$memcache->connect(self::MC_HOST, self::MC_PORT);
+           self::$memcache = Mcache::init();
         }
     }
     
@@ -110,28 +84,13 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
         return $this->is_locked;
     }
     
-    function clearTag($tagKey){
-        self::$memcache->set($tagKey, time(), false, 0 );
-    }
-    
     function get($CacheKey){
-        # Если объекта в мем кеше не нашлось, то ищем в файле
-        # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
-        //if( false===( $c_arr = self::$memcache->get( Array( $CacheKey, self::EXPR_PREF . $CacheKey ) )) || !isset($c_arr[$CacheKey]) || !isset($c_arr[self::EXPR_PREF . $CacheKey]) ){
-        if( false===( $cobj=self::$memcache->get($CacheKey) ) ){
-           # Пытаемся установить блокировку
-           # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-           if($this->set_lock($CacheKey))
-             return false;
-           # Пытаемся получить Кеш из файла
-           if( file_exists(self::CACHE_PATH.$CacheKey.self::CACHE_EXT) )
-              return unserialize(file_get_contents(self::CACHE_PATH.$CacheKey.self::CACHE_EXT));
-           # Если файл кеша так же отсутствует, безусловно перекешируем
+        # если объекта в кеше не нашлось, то безусловно перекешируем
+        if( false===($cobj = self::$memcache->get($CacheKey)) )
            return false;
-        }
-        
+
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
-        if( false===( $expire=self::$memcache->get(self::EXPR_PREF . $CacheKey) ) || $expire < time() ){
+        if($cobj['expire'] < time()){
           # Пытаемся установить блокировку
           # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
           if($this->set_lock($CacheKey))
@@ -188,32 +147,20 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
                     self::$memcache->set( $tags[$i], $thetime, false, 0 );
                   }
           }
-        $expire = (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime);
         $cobj = Array(
+                      'expire' => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime),
                       'data' => $CacheVal,
                       'tags' => $tags_mc
                      );
-        
-        self::$memcache->set(self::EXPR_PREF.$CacheKey, $expire, false, 0);
         self::$memcache->set($CacheKey, $cobj, self::COMPRES, 0);
-        
-        # Пишем кеш в файл
-        if(!is_dir(self::CACHE_PATH))
-           mkdir(self::CACHE_PATH, 0777);
-           
-        
-        $tmp_file = tempnam(self::TMP_PATH, 'fctmp_');
-        file_put_contents($tmp_file, serialize($CacheVal) );
-        # Атомарно перемещаем файл с данными кеша в файловый кеш
-        rename($tmp_file,self::CACHE_PATH.$CacheKey.self::CACHE_EXT);
-        
-        # Снимаем блокировку
+
         if($this->is_locked){
             $this->is_locked = false;
             self::$memcache->delete(self::LOCK_PREF . $CacheKey);
         }
         
         return $CacheVal;
+
     }
     
     /*
@@ -222,9 +169,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
      * @param $CacheKey  string
      */
     function del($CacheKey){
-        //return self::$memcache->delete($CacheKey);
-        //return self::$memcache->set(self::EXPR_PREF.$CacheKey, 0, false, 0);
-        return self::$memcache->delete(self::EXPR_PREF.$CacheKey);
+        return self::$memcache->delete($CacheKey);
     }
     
 }

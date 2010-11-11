@@ -1,9 +1,24 @@
 <?php
- echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
+
+################################################################################
+$memory_get_usage_start = (memory_get_usage()/1024);
+
+function microtime_float(){
+    list($usec, $sec) = explode(" ", microtime());
+    return ((float)$usec + (float)$sec);
+   }
+
+function print_time($time_start){
+    static $cal_nom = 0;
+    $cal_nom++;
+    echo '<hr>time: '.( (microtime_float() - $time_start)*1000 )." ms ($cal_nom)<br>";
+   }
+$time_start = microtime_float();
+################################################################################ 
+ 
  require './config/Cacher.php';
  require './config/Cacher_Backends.php';
  require './config/base.php';
-
 ################################################################################
 /**
   *   __autoload
@@ -12,7 +27,6 @@
        require './src/class.'.strtolower($ClassName).'.php';
     }
 ################################################################################
-
  /*
   * class User
   */
@@ -45,15 +59,13 @@
     * 
     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 */
-
     function GetFromAnyExternal(User $User){
         return Array('username','userage'=>20, date('h:i:s A') );
     }
     $User = new User();
     Cacher::Slot('User',$User);
     echo Cacher::$BackendName;
-
-
+    
 /*
 $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
 Cacher::addTag(Cacher::newTag('SmplTag',$User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
@@ -97,7 +109,13 @@ var_export($CacheData);
 echo '</pre><hr>';
 
 //echo '<hr><pre>';var_export(get_defined_functions());echo '</pre><hr>';
-echo '<hr>'.$memcache->get('cachecnt'); 
-echo '<hr>memory_get_usage: '.(memory_get_usage()/1024) .'Кб<br>';
+echo '<hr>'.$memcache->get('cachecnt');
+
+
+################################################################################
+
+echo '<br>';
+echo '<hr>memory usage: '.(memory_get_usage()/1024-$memory_get_usage_start) .'Кб<br>';
+    print_time($time_start);
 
 ?>

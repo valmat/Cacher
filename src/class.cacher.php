@@ -29,9 +29,8 @@
     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     */
 
-class Cacher {
+final class Cacher {
     
-    const PATH_TAGS     = CACHER_PATH_TAGS;
     const PATH_SLOTS    = CACHER_PATH_SLOTS;
     const PATH_BACKENDS = CACHER_PATH_BACKENDS;
     
@@ -46,29 +45,34 @@ class Cacher {
      *  Backend object responsible for this cache slot.
      *  @var Cacher_Backend
      */
-    private static   $Backend;
+    private    $Backend;
     /**
      *  Backend name
      *  @var string
      */
-    public static    $BackendName;
+    private    $BackendName;
     /**
      * Lifetime of this slot.
      * @var int
      */
-    private static   $LifeTime;
+    private    $LifeTime;
     /**
      * Calculated Key associated to this slot.
      * @var string
      */
-    private static   $CacheKey = null;
+    private    $CacheKey = null;
     /**
      * Tags attached to this slot.
      * @var array of Cacher_Tag
      */
-    private static   $Tags;
+    private    $Tags = Array();
     
-    private function __construct() {}    
+    /*
+     * private constructor
+     */
+    private function __construct() {
+        //$this->Tags =
+      }    
     
     /*
      * ¬ыполн€ет подключение слота кешировани€ $SlotName и передает ему необходимые дл€ создани€ аргументы $arg
@@ -78,55 +82,44 @@ class Cacher {
      * @param $SlotName
      * @param $arg
      */
-    static function Slot($SlotName,$arg) {
+    static function create($SlotName, $arg) {
+      $SelfObj = new Cacher();
       if (!defined('CACHER_SLOT_REQUIRED'))
         require self::PATH_SLOTS;
         
       $SlotName = 'Cacher_Slot_'.$SlotName;
-      $SlotName($arg);
-      self::$Tags = Array();
+      $SlotName($SelfObj, $arg);
+      return $SelfObj;
     }
     
     /*
      * function _setOption
-     * Ётот метод создан дл€ использовани€ в дргуе класса
+     * Ётот метод создан дл€ использовани€ в в —лоте
      * 
      * @param $Backend Cacher_Backend
      * @param $LifeTime int
      * @param $key string
      */
-    static function _setOption($BackendName,$LifeTime,$key) {
-        self::$BackendName = $BackendName;
-        self::$Backend = self::setBackend($BackendName);
-        self::$LifeTime = $LifeTime;
-        self::$CacheKey = self::NAME_SPACE.$key;
+    public function _setOption($BackendName, $LifeTime, $key) {
+        $this->BackendName = $BackendName;
+        $this->Backend = self::setBackend($BackendName);
+        $this->LifeTime = $LifeTime;
+        $this->CacheKey = self::NAME_SPACE.$key;
     }
-
-    /*
-     * —оздает новый тег и возвращает ссылку на созданный объект
-     * function newTag
-     * @param $arg
-     */
-    static function newTag($TagName,$arg) {
-      if (!defined('CACHER_TAG_REQUIRED'))
-        require self::PATH_TAGS;
-      
-      $TagName = 'Cacher_Tag_'.$TagName;
-      return new $TagName($arg);
-    }
-    
+  
     /**
      * ƒобавл€ет тег к слоту
      * 
      * @param Cacher_Tag $tag   Tag object to associate.
      * @return void
      */
-    public function addTag(Cacher_Tag $tag)
-    {
-        if ($tag->BackendName !== self::$BackendName) {
-            trigger_error('Backends for tag ' . get_class($tag) . ' and slot ' . get_class($this) . ' must be same', E_USER_WARNING);
+    public function addTag(Cacher_Tag $tag) {
+        if ($tag->getBkName() == $this->BackendName) {
+            $this->Tags[] = $tag->getKey();
+            return true;
         }
-        self::$Tags[] = $tag;
+        trigger_error('Backends for tag ' . get_class($tag) . ' and slot ' . get_class($this) . ' must be same', E_USER_WARNING);
+        return false;
     }
     
     /*
@@ -136,11 +129,13 @@ class Cacher {
      * function setBackend
      * @param $BackendName string
      */
-    static public function setBackend($BackendName) {
-        if(!class_exists('Cacher_Backend_'.$BackendName,false))
-          {
+    static function setBackend($BackendName) {
+        /*
+        if(!class_exists('Cacher_Backend_'.$BackendName,false)){
             require self::PATH_BACKENDS.strtolower($BackendName).'.php';
           }
+        */
+        require_once self::PATH_BACKENDS . strtolower($BackendName) . '/slot.php';
         $BackendName = 'Cacher_Backend_'.$BackendName;
         return new $BackendName();
     }
@@ -152,8 +147,8 @@ class Cacher {
      * @param void
      * @return mixed   Complex data or false if no cache entry is found.
      */
-    static function get() {
-        return self::$Backend->get(self::$CacheKey);
+    public function get() {
+        return $this->Backend->get($this->CacheKey);
     }
     
     /*
@@ -162,18 +157,10 @@ class Cacher {
      * 
      * function set
      * @param mixed $val  Data to be saved.
-     * @return bool -у спешность операции
+     * @return bool - успешность операции
      */
-    static function set($val) {
-        //return self::$LastSlot->set($val);
-        
-        $tags = array();
-        $tagCnt = count(self::$Tags);
-        for($i=0;$i<$tagCnt;$i++){
-            $tags[] = self::$Tags[$i]->getVal();
-        }
-        return self::$Backend->set(self::$CacheKey, $val, $tags, self::$LifeTime);
-        
+    public function set($val) {
+        return $this->Backend->set($this->CacheKey, $val, $this->Tags, $this->LifeTime);
     }
 
     /*
@@ -183,8 +170,8 @@ class Cacher {
      * @param void
      * @return void
      */
-    static function del() {
-        self::$Backend->del(self::$CacheKey);
+    public function del() {
+        $this->Backend->del($this->CacheKey);
     }
   
 }
