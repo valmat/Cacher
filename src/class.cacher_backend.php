@@ -5,13 +5,16 @@
  * 
  */
 
-interface Cacher_Backend
+abstract class Cacher_Backend
  {
+    private $key;
+    private $nameSpace;
+    
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
      * function get
      */
-    function get();
+    abstract function get();
     /*
      * Установить данные в кеш
      * function set
@@ -19,11 +22,23 @@ interface Cacher_Backend
      * @param $tags     array   Массив тегов кеширования
      * @param $LifeTime int     Время жизни кеша
      */
-    function set($CacheVal, $tags, $LifeTime=0);
+    abstract function set($CacheVal, $tags, $LifeTime=0);
     /*
      * Очистить кеш по ключу
      * function del
      */
-    function del();
+    abstract function del();
+    
+    /*
+     * __construct()
+     * @param $arg
+     */
+    
+    function __construct($CacheKey, $nameSpace) {
+        $this->key       = $CacheKey;
+        $this->nameSpace = $nameSpace;
+    }
  }
+
+
 ?>
