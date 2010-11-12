@@ -1,28 +1,12 @@
 <?php
 ################################################################################
 /**
-  *  [Cacher_Tag]
-  *  config for class  Cacher_Tag
-  */
-/*
-    # NameSpase prefix for tag key
-    define('CACHER_TAG_NAME_SPACE', 'dflt_k' );
-*/
-################################################################################
-/**
-  *  [Cacher]
-  *  config for class  Cacher
+  *  [Cacher & Cacher_Tag]
+  *  config for class  Cacher and Cacher_Tag
   */
 
-/*
-    # NameSpase prefix for cache key
-    define('CACHER_NAME_SPACE', 'dflt' );
 
-    define('CACHER_PATH_TAGS',     './src/data/tags.php');
-    define('CACHER_PATH_SLOTS',    './src/data/slots.php');
-    define('CACHER_PATH_BACKENDS', './src/data/strategy/');
-*/
-    class CACHER_CONFIG {
+    class CONFIG_Cacher {
         # NameSpase prefix for cache key
         const NAME_SPACE    = 'dflt';
         
