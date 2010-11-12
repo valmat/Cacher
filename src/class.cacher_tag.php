@@ -14,17 +14,17 @@ abstract class Cacher_Tag
      *  NameSpase prefix for cache key
      *  var set as default mast by redeclaradet
      */
-    const  NAME_SPACE = CACHER_TAG_NAME_SPACE;
+    const  NAME_SPACE    = CONFIG_Cacher::TAG_NM_SPACE;
     
     /**
      *  Path to Tags backends
      */
-    const  PATH_BACKENDS = CACHER_PATH_BACKENDS;
+    const  PATH_BACKENDS = CONFIG_Cacher::PATH_BACKENDS;
 
     /**
      *  Path to Tags definitions 
      */
-    const  PATH_TAGS  = CACHER_PATH_TAGS;
+    const  PATH_TAGS     = CONFIG_Cacher::PATH_TAGS;
     
     /**
      *  Backend object responsible for this cache tag.
