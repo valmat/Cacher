@@ -84,7 +84,7 @@
       */
 
 
-    class CONFIG_Cacher_BK_MemReCache0 {
+    class CONFIG_Cacher_BK_MemReCache {
 
         /**
           * Префикс для формирования ключа блокировки
