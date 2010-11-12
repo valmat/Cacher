@@ -22,7 +22,7 @@ abstract class Cacher_Backend
      * @param $tags     array   Массив тегов кеширования
      * @param $LifeTime int     Время жизни кеша
      */
-    abstract function set($CacheVal, $tags, $LifeTime=0);
+    abstract function set($CacheVal, $tags, $LifeTime);
     /*
      * Очистить кеш по ключу
      * function del

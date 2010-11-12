@@ -137,7 +137,7 @@ class Cacher_Backend_MemReCache extends Cacher_Backend {
      * function set
      * @param $CacheVal string, $tags array, $LifeTime int
      */
-    function set($CacheVal, $tags, $LifeTime=self::MAX_LTIME){
+    function set($CacheVal, $tags, $LifeTime){
         $thetime = time();
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
