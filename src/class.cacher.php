@@ -31,15 +31,15 @@
 
 final class Cacher {
     
-    const PATH_SLOTS    = CACHER_PATH_SLOTS;
-    const PATH_BACKENDS = CACHER_PATH_BACKENDS;
+    const PATH_SLOTS    = CONFIG_Cacher::PATH_SLOTS;
+    const PATH_BACKENDS = CONFIG_Cacher::PATH_BACKENDS;
     
     /**
      *  NameSpase prefix for cache key
      *  var set as default should be redefined
      *  @var string
      */
-    const  NAME_SPACE   = CACHER_NAME_SPACE;
+    const  NAME_SPACE   = CONFIG_Cacher::NAME_SPACE;
     
     /**
      *  Backend object responsible for this cache slot.

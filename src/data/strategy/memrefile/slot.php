@@ -49,37 +49,37 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
     /**
       * Префикс для формирования ключа блокировки
       */
-    const LOCK_PREF = CACHER_BK_MEMREFILE_LOCK_PREF;
+    const LOCK_PREF = CONFIG_Cacher_BK_MemReFile::LOCK_PREF;
     /**
       * Время жизни ключа блокировки. Если во время перестроения кеша процесс аварийно завершится,
       * то блокировка останется включенной и другие процессы будут продолжать выдавать протухший кеш LOCK_TIME секунд.
       * С другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состояние гонки и блокировочный механизм перестанет работать.
       * Т.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
       */
-    const LOCK_TIME = CACHER_BK_MEMREFILE_LOCK_TIME;
+    const LOCK_TIME = CONFIG_Cacher_BK_MemReFile::LOCK_TIME;
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
-    const MAX_LTIME = CACHER_BK_MEMREFILE_MAX_LTIME;
+    const MAX_LTIME = CONFIG_Cacher_BK_MemReFile::MAX_LTIME;
     /**
       * EXPIRE PREFIX - префикс для хранения ключа со временем истечения кеша
       */
-    const EXPR_PREF = CACHER_BK_MEMREFILE_EXPR_PREF;
+    const EXPR_PREF = CONFIG_Cacher_BK_MemReFile::EXPR_PREF;
     
     /**
       * CACHE PATH - Путь к дериктории хранения кеша
       */
-    const CACHE_PATH = CACHER_BK_MEMREFILE_C_PATH;
+    const CACHE_PATH = CONFIG_Cacher_BK_MemReFile::CACHE_PATH;
 
     /**
       * TMP PATH - Путь к папке со временными файлами
       */
-    const TMP_PATH   = CACHER_BK_MEMREFILE_TMP_PATH;
+    const TMP_PATH   = CONFIG_Cacher_BK_MemReFile::TMP_PATH;
     
     /**
       * CACHE EXTENTION - Расширение для файлов кеша
       */
-    const CACHE_EXT  = CACHER_BK_MEMREFILE_C_EXT;
+    const CACHE_EXT  = CONFIG_Cacher_BK_MemReFile::C_EXT;
     
     /**
       * Флаг установленной блокировки
