@@ -38,7 +38,7 @@
         /**
           * CACHE PATH - Путь к дериктории хранения кеша. В конце обратный слеш '/'
           */
-        const C_PATH      = '/tmp/safecache/';
+        const CACHE_PATH  = '/tmp/safecache/';
         
         /**
           * TMP PATH - Путь к папке со временными файлами
