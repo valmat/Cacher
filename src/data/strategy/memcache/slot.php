@@ -32,7 +32,7 @@
  * 
  */
 
-class Cacher_Backend_Memcache  implements Cacher_Backend{
+class Cacher_Backend_Memcache  extends Cacher_Backend{
     
     private static $memcache=null;
     
@@ -40,20 +40,19 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
     const COMPRES = false;//MEMCACHE_COMPRESSED;
     
     
-    function __construct() {
-        if(null==self::$memcache){
-           self::$memcache = Mcache::init();
-        }
+    function __construct($CacheKey, $nameSpace) {
+        parent::__construct($CacheKey, $nameSpace);
+        $this->key = $nameSpace . $CacheKey;
+        self::$memcache = Mcache::init();
     }
 
     /*
      * Получение кеша
      * function get
-     * @param $CacheKey string
      */
-    function get($CacheKey){
+    function get(){
         # если объекта в кеше не нашлось
-        if( false===($cobj = self::$memcache->get($CacheKey)) )
+        if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
         
         $tags = $cobj['tags'];
@@ -80,9 +79,11 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
     /*
      * Установка значения кеша по ключу вместе с тегами и указанием срока годности кеша
      * function set
-     * @param $CacheVal string,$CacheKey  string, $tags array, $LifeTime int
+     * @param $CacheVal string
+     * @param $tags array
+     * @param $LifeTime int
      */
-    function set($CacheKey, $CacheVal, $tags, $LifeTime=0){
+    function set($CacheVal, $tags, $LifeTime){
         $thetime = time();
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
@@ -93,27 +94,25 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
         if( $tags_cnt>0 && count($tags_mc)!= $tags_cnt)
           {
             for($i=0;$i<$tags_cnt;$i++)
-               if(!isset($tags_mc[$tags[$i]]))
-                  {
-                    $tags_mc[$tags[$i]] = $thetime;
-                    self::$memcache->set( $tags[$i], $thetime, false, 0 );
-                  }
+               if(!isset($tags_mc[$tags[$i]])){
+                   $tags_mc[$tags[$i]] = $thetime;
+                   self::$memcache->set( $tags[$i], $thetime, false, 0 );
+               }
           }
         $cobj = Array(
                       'data' => $CacheVal,
                       'tags' => $tags_mc
                      );
-        self::$memcache->set($CacheKey, $cobj, self::COMPRES, $LifeTime);
+        self::$memcache->set($this->key, $cobj, self::COMPRES, $LifeTime);
         return $CacheVal;
     }
     
     /*
      * Удаление кеша по собственному ключу
      * function del
-     * @param $CacheKey string
      */
-    function del($CacheKey){
-        return self::$memcache->delete($CacheKey);
+    function del(){
+        return self::$memcache->delete($this->key);
     }
     
 }
