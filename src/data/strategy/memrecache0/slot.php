@@ -29,7 +29,7 @@
  * 
  */
 
-class Cacher_Backend_MemReCache0 implements Cacher_Backend{
+class Cacher_Backend_MemReCache0 extends Cacher_Backend{
     
     private static $memcache=null;
     
@@ -61,15 +61,15 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
     /**
       * Флаг установленной блокировки
       * После установки этот флаг помечается в true
-      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
+      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $this->key)]
       * Затем флаг блокировки должен быть снят: $this->is_locked = false;
       */
     private        $is_locked = false;
     
-    function __construct() {
-        if(null==self::$memcache){
-           self::$memcache = Mcache::init();
-        }
+    function __construct($CacheKey, $nameSpace) {
+        parent::__construct($CacheKey, $nameSpace);
+        $this->key = $nameSpace . $CacheKey;
+        self::$memcache = Mcache::init();
     }
     
     /*
@@ -78,22 +78,22 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
      * function set_lock
      * @param $arg void
      */
-    private function set_lock($CacheKey) {
-        if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $CacheKey)) )
-           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $CacheKey,true,false,self::LOCK_TIME);
+    private function set_lock() {
+        if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $this->key)) )
+           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key, true, false, self::LOCK_TIME);
         return $this->is_locked;
     }
     
-    function get($CacheKey){
+    function get(){
         # если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===($cobj = self::$memcache->get($CacheKey)) )
+        if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
 
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
         if($cobj['expire'] < time()){
           # Пытаемся установить блокировку
           # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-          if($this->set_lock($CacheKey))
+          if($this->set_lock())
             return false;
           return $cobj['data'];
         }
@@ -107,7 +107,7 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
         $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
-          if($this->set_lock($CacheKey))
+          if($this->set_lock())
             return false;
           return $cobj['data'];        
         }
@@ -115,7 +115,7 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
         # Если кеш протух по тегам, то сообщаем об этом
         foreach($tags as $tag_k => $tag_v){
             if($tags_mc[$tag_k]>$tag_v){
-              if($this->set_lock($CacheKey))
+              if($this->set_lock())
                  return false;
               return $cobj['data'];        
             }
@@ -128,9 +128,9 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
      * Установка значения кеша по ключу вместе с тегами и указанием срока годности кеша
      * Проверяется установка блокировки
      * function set
-     * @param $CacheVal string,$CacheKey  string, $tags array, $LifeTime int
+     * @param $CacheVal string, $tags array, $LifeTime int
      */
-    function set($CacheKey, $CacheVal, $tags, $LifeTime=self::MAX_LTIME){
+    function set($CacheVal, $tags, $LifeTime){
         $thetime = time();
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
@@ -152,11 +152,11 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
                       'data' => $CacheVal,
                       'tags' => $tags_mc
                      );
-        self::$memcache->set($CacheKey, $cobj, self::COMPRES, 0);
+        self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
 
         if($this->is_locked){
             $this->is_locked = false;
-            self::$memcache->delete(self::LOCK_PREF . $CacheKey);
+            self::$memcache->delete(self::LOCK_PREF . $this->key);
         }
         
         return $CacheVal;
@@ -166,10 +166,9 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
     /*
      * Полная очистка текущего кеша без поддержки переекеширования. Если нужно удаление с перекешированием, то нужно использовать теги
      * function del
-     * @param $CacheKey  string
      */
-    function del($CacheKey){
-        return self::$memcache->delete($CacheKey);
+    function del(){
+        return self::$memcache->delete($this->key);
     }
     
 }
