@@ -12,9 +12,7 @@ class Cache_Tag_Backend_Memcache  implements Cache_Tag_Backend{
     const NAME    = 'Memcache';
     
     function __construct() {
-        if(null==self::$memcache){
-           self::$memcache = Mcache::init();
-        }
+        self::$memcache = Mcache::init();
     }
 
     /*
