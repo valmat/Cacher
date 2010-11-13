@@ -37,7 +37,7 @@
  * 
  */
 
-class Cacher_Backend_MemReFile implements Cacher_Backend{
+class Cacher_Backend_MemReFile extends Cacher_Backend{
     
     private static $memcache=null;
     
@@ -89,45 +89,44 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
       */
     private        $is_locked = false;
     
-    function __construct() {
-        if(null==self::$memcache){
-           self::$memcache = Mcache::init();
-        }
+    function __construct($CacheKey, $nameSpace) {
+        parent::__construct($CacheKey, $nameSpace);
+        $this->key = $nameSpace . $CacheKey;
+        self::$memcache = Mcache::init();
     }
     
     /*
      * проверяем не установил ли кто либо блокировку
      * Если блокировка не установлена, пытаемся создать ее методом add, что бы предотвратить состояние гонки
      * function set_lock
-     * @param $arg void
      */
-    private function set_lock($CacheKey) {
-        if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $CacheKey)) )
-           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $CacheKey,true,false,self::LOCK_TIME);
+    private function set_lock() {
+        if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $this->key)) )
+           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key,true,false,self::LOCK_TIME);
         return $this->is_locked;
     }
     
-    function get($CacheKey){
+    function get(){
         # Если объекта в мем кеше не нашлось, то ищем в файле
         # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
-        //if( false===( $c_arr = self::$memcache->get( Array( $CacheKey, self::EXPR_PREF . $CacheKey ) )) || !isset($c_arr[$CacheKey]) || !isset($c_arr[self::EXPR_PREF . $CacheKey]) ){
-        if( false===( $cobj=self::$memcache->get($CacheKey) ) ){
+        //if( false===( $c_arr = self::$memcache->get( Array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) || !isset($c_arr[self::EXPR_PREF . $this->key]) ){
+        if( false===( $cobj=self::$memcache->get($this->key) ) ){
            # Пытаемся установить блокировку
            # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-           if($this->set_lock($CacheKey))
+           if($this->set_lock())
              return false;
            # Пытаемся получить Кеш из файла
-           if( file_exists(self::CACHE_PATH.$CacheKey.self::CACHE_EXT) )
-              return unserialize(file_get_contents(self::CACHE_PATH.$CacheKey.self::CACHE_EXT));
+           if( file_exists(self::CACHE_PATH . $this->key . self::CACHE_EXT) )
+              return unserialize(file_get_contents(self::CACHE_PATH . $this->key . self::CACHE_EXT));
            # Если файл кеша так же отсутствует, безусловно перекешируем
            return false;
         }
         
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
-        if( false===( $expire=self::$memcache->get(self::EXPR_PREF . $CacheKey) ) || $expire < time() ){
+        if( false===( $expire=self::$memcache->get(self::EXPR_PREF . $this->key) ) || $expire < time() ){
           # Пытаемся установить блокировку
           # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-          if($this->set_lock($CacheKey))
+          if($this->set_lock())
             return false;
           return $cobj['data'];
         }
@@ -141,7 +140,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
         $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
-          if($this->set_lock($CacheKey))
+          if($this->set_lock())
             return false;
           return $cobj['data'];        
         }
@@ -149,7 +148,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
         # Если кеш протух по тегам, то сообщаем об этом
         foreach($tags as $tag_k => $tag_v){
             if($tags_mc[$tag_k]>$tag_v){
-              if($this->set_lock($CacheKey))
+              if($this->set_lock())
                  return false;
               return $cobj['data'];        
             }
@@ -162,9 +161,9 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
      * Установка значения кеша по ключу вместе с тегами и указанием срока годности кеша
      * Проверяется установка блокировки
      * function set
-     * @param $CacheVal string,$CacheKey  string, $tags array, $LifeTime int
+     * @param $CacheVal string,  string, $tags array, $LifeTime int
      */
-    function set($CacheKey, $CacheVal, $tags, $LifeTime=self::MAX_LTIME){
+    function set($CacheVal, $tags, $LifeTime){
         $thetime = time();
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
@@ -187,8 +186,8 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
                       'tags' => $tags_mc
                      );
         
-        self::$memcache->set(self::EXPR_PREF.$CacheKey, $expire, false, 0);
-        self::$memcache->set($CacheKey, $cobj, self::COMPRES, 0);
+        self::$memcache->set(self::EXPR_PREF . $this->key, $expire, false, 0);
+        self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
         
         # Пишем кеш в файл
         if(!is_dir(self::CACHE_PATH))
@@ -198,12 +197,12 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
         $tmp_file = tempnam(self::TMP_PATH, 'fctmp_');
         file_put_contents($tmp_file, serialize($CacheVal) );
         # Атомарно перемещаем файл с данными кеша в файловый кеш
-        rename($tmp_file,self::CACHE_PATH.$CacheKey.self::CACHE_EXT);
+        rename($tmp_file,self::CACHE_PATH . $this->key . self::CACHE_EXT);
         
         # Снимаем блокировку
         if($this->is_locked){
             $this->is_locked = false;
-            self::$memcache->delete(self::LOCK_PREF . $CacheKey);
+            self::$memcache->delete(self::LOCK_PREF . $this->key);
         }
         
         return $CacheVal;
@@ -212,12 +211,9 @@ class Cacher_Backend_MemReFile implements Cacher_Backend{
     /*
      * Полная очистка текущего кеша без поддержки переекеширования. Если нужно удаление с перекешированием, то нужно использовать теги
      * function del
-     * @param $CacheKey  string
      */
-    function del($CacheKey){
-        //return self::$memcache->delete($CacheKey);
-        //return self::$memcache->set(self::EXPR_PREF.$CacheKey, 0, false, 0);
-        return self::$memcache->delete(self::EXPR_PREF.$CacheKey);
+    function del(){
+        return self::$memcache->delete(self::EXPR_PREF . $this->key);
     }
     
 }
