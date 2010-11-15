@@ -65,21 +65,14 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
       * EXPIRE PREFIX - префикс для хранения ключа со временем истечения кеша
       */
     const EXPR_PREF = CONFIG_Cacher_BK_MemReFile::EXPR_PREF;
-    
     /**
       * CACHE PATH - Путь к дериктории хранения кеша
       */
     const CACHE_PATH = CONFIG_Cacher_BK_MemReFile::CACHE_PATH;
-
     /**
-      * TMP PATH - Путь к папке со временными файлами
+      * Cache file path depth - Глубина вложенности файлов с кешем
       */
-    const TMP_PATH   = CONFIG_Cacher_BK_MemReFile::TMP_PATH;
-    
-    /**
-      * CACHE EXTENTION - Расширение для файлов кеша
-      */
-    const CACHE_EXT  = CONFIG_Cacher_BK_MemReFile::C_EXT;
+    const CF_DEPTH   = CONFIG_Cacher_BK_MemReFile::CF_DEPTH;
     
     /**
       * Флаг установленной блокировки
@@ -87,10 +80,21 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
       * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
       * Затем флаг блокировки должен быть снят: $this->is_locked = false;
       */
-    private        $is_locked = false;
+    private $is_locked = false;
+    
+    /**
+      * Полный путь (относительно self::CACHE_PATH) к файловому кешу для данного ключа
+      */
+    private $fullpath = '';
+    
+    /**
+      * Массив путей к файловому кешу в иерархии поддиректорий
+      */
+    private $patharr = Array();
     
     function __construct($CacheKey, $nameSpace) {
-        parent::__construct($CacheKey, $nameSpace);
+        //parent::__construct($CacheKey, $nameSpace);
+        $this->nameSpace = $nameSpace;        
         $this->key = $nameSpace . $CacheKey;
         self::$memcache = Mcache::init();
     }
@@ -116,8 +120,9 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
            if($this->set_lock())
              return false;
            # Пытаемся получить Кеш из файла
-           if( file_exists(self::CACHE_PATH . $this->key . self::CACHE_EXT) )
-              return unserialize(file_get_contents(self::CACHE_PATH . $this->key . self::CACHE_EXT));
+           $this->getPath();
+           if( file_exists( $this->fullpath ) )
+              return unserialize(file_get_contents( $this->fullpath ));
            # Если файл кеша так же отсутствует, безусловно перекешируем
            return false;
         }
@@ -190,14 +195,19 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
         self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
         
         # Пишем кеш в файл
-        if(!is_dir(self::CACHE_PATH))
-           mkdir(self::CACHE_PATH, 0777);
-           
-        
-        $tmp_file = tempnam(self::TMP_PATH, 'fctmp_');
-        file_put_contents($tmp_file, serialize($CacheVal) );
-        # Атомарно перемещаем файл с данными кеша в файловый кеш
-        rename($tmp_file,self::CACHE_PATH . $this->key . self::CACHE_EXT);
+        # Если блокировку установил текущий процесс, то пишем в файл
+        if($this->is_locked){
+            $this->getPath();
+            $thedir = self::CACHE_PATH;
+            for($i=0; $i<=self::CF_DEPTH; $i++){
+                if(!is_dir($thedir .= '/' . $this->patharr[$i]))
+                   mkdir($thedir, 0700);
+            }
+            $tmp_file = tempnam($thedir, 'fctmp_');
+            file_put_contents($tmp_file, serialize($CacheVal) );
+            # Атомарно перемещаем файл с данными кеша в файловый кеш
+            rename($tmp_file, $this->fullpath);
+        }        
         
         # Снимаем блокировку
         if($this->is_locked){
@@ -214,6 +224,24 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
      */
     function del(){
         return self::$memcache->delete(self::EXPR_PREF . $this->key);
+    }
+    
+    /*
+     * function getPath
+     * @param $arg
+     */
+    private function getPath() {
+        if(''==$this->fullpath){
+            $this->patharr[] = $this->nameSpace;
+            $sha1 = sha1($this->key);
+            
+            for($i=0; $i<self::CF_DEPTH; $i++){
+                $this->patharr[] = $sha1[2*$i] . $sha1[2*$i+1];
+            }
+            $this->patharr[] = substr($sha1, 2*self::CF_DEPTH);
+            $this->fullpath = self::CACHE_PATH .'/'. implode('/',$this->patharr);
+            
+        }
     }
     
 }
