@@ -63,14 +63,14 @@ function print_time($cmnt = ''){
        
        public $id;
        function __construct($id=5) {
-           $this->id = $id;
+           $this->id = rand(1,20000);
        }
     }
     
     
 
     function GetFromAnyExternal(User $User){
-        return Array('username','userage'=>20, date('h:i:s A') );
+        return Array('username','userid'=>$User->id, date('h:i:s A') );
     }
     
     $User = new User();
@@ -86,7 +86,7 @@ function print_time($cmnt = ''){
          
          Cacher_Tag::create('SmplTag', $User)->getKey();
          
-         sleep(1);// hard data
+         //sleep(1);// hard data
          
          echo '<hr><font color=blue>Кешируем данные</font><hr>';
            

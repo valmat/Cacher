@@ -38,7 +38,7 @@
         /**
           * CACHE PATH - Путь к дериктории хранения кеша. В конце обратный слеш '/'
           */
-        const CACHE_PATH  = '/tmp/safecache/';
+        const CACHE_PATH  = './.tmp';
         
         /**
           * TMP PATH - Путь к папке со временными файлами
@@ -49,6 +49,13 @@
           * CACHE EXTENTION - Расширение для файлов кеша
           */
         const C_EXT       = '.cache';
+        
+        /**
+          * Cache file path depth - Глубина вложенности файлов с кешем
+          * max value: 19
+          */
+        const CF_DEPTH       = 1;
+        
         
     }
 
