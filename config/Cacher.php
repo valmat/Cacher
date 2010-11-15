@@ -61,5 +61,19 @@
           */
         const CHEAP = 'MemReFile';        
     }
+    
+    class CacheTagTypes{
+        
+        /**
+          * Быстрое хранилище (в памяти). Низкая надежность.
+          * Стабильная работа expire
+          */
+        const FAST = 'Memcache';
+    
+        /**
+          * Без тегов. Использовать там, где теги не нужны
+          */
+        const NOTAG = 'empty';
+    }
 
 ?>

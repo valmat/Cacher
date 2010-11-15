@@ -115,6 +115,9 @@ final class Cacher {
      * @return void
      */
     public function addTag(Cacher_Tag $tag) {
+        echo "<hr><pre>";
+        var_export(Array($tag->getBkName(),$this->BackendName));
+        echo "<hr></pre>";
         if ($tag->getBkName() == $this->BackendName) {
             $this->Tags[] = $tag->getKey();
             return true;

@@ -18,11 +18,11 @@
      */
         
     function Cacher_Slot_User(User $arg) {
-       return Cacher::setOption(CacheTypes::FAST , 'Memcache', 10, "user_{$arg->id}");
+       return Cacher::setOption(CacheTypes::FAST , CacheTagTypes::FAST, 10, "user_{$arg->id}");
     }
         
     function Cacher_Slot_User1(User1 $arg) {
-       return Cacher::setOption(CacheTypes::FAST , 'Memcache', 10, "user_{$arg->id}");
+       return Cacher::setOption(CacheTypes::FAST , CacheTagTypes::FAST, 10, "user_{$arg->id}");
     }    
 
 ?>
