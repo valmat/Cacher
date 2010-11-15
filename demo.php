@@ -81,10 +81,10 @@ function print_time($cmnt = ''){
     if (false === ($CacheData = $slot->get()))// Если данные из кеша получить не удалось...
     { 
          $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
-         $slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-         $slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+         //$slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
          
-         Cacher_Tag::create('SmplTag', $User)->getKey();
+         //Cacher_Tag::create('SmplTag', $User)->getKey();
          
          //sleep(1);// hard data
          
