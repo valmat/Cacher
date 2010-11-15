@@ -30,11 +30,11 @@ abstract class Cacher_Backend
     abstract function del();
     /*
      * Тип используемых тегов. Знание о тегах должно храниться именно в слоте
-     * tagType()
+     * tagsType()
      * @param void
      * @return string Cache tag type throw CacheTagTypes namespace
      */
-    abstract function tagType(); /*{return CacheTagTypes::FAST;}*/
+    abstract function tagsType(); /*{return CacheTagTypes::FAST;}*/
     
     /*
      * __construct()
