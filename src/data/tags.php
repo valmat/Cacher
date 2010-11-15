@@ -33,7 +33,7 @@
          return 'profile_'.$var->id;
        }
        static function getBkName(){
-         return CacheTypes::FAST;
+         return CacheTagTypes::FAST;
        }
    }
    
@@ -51,7 +51,7 @@
          return 'profile_'.$var->id;
        }
        static function getBkName(){
-         return CacheTypes::FAST;
+         return CacheTagTypes::FAST;
        }
    }
 

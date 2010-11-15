@@ -9,7 +9,7 @@ abstract class Cacher_Backend
  {
     private $key;
     private $nameSpace;
-    
+        
     /*
      * ѕолучить значение кеша если есть, или false, если отсутствует.
      * function get
@@ -28,12 +28,18 @@ abstract class Cacher_Backend
      * function del
      */
     abstract function del();
+    /*
+     * “ип используемых тегов. «нание о тегах должно хранитьс€ именно в слоте
+     * tagsType()
+     * @param void
+     * @return string Cache tag type throw CacheTagTypes namespace
+     */
+    abstract function tagsType(); /*{return CacheTagTypes::FAST;}*/
     
     /*
      * __construct()
-     * @param $arg
+     * @param void
      */
-    
     function __construct($CacheKey, $nameSpace) {
         $this->key       = $CacheKey;
         $this->nameSpace = $nameSpace;

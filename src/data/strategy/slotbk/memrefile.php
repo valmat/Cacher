@@ -42,6 +42,7 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
     private static $memcache=null;
     
     const NAME      = 'MemReFile';
+
     /**
       * сжатие memcache
       */
@@ -224,6 +225,15 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
      */
     function del(){
         return self::$memcache->delete(self::EXPR_PREF . $this->key);
+    }
+    
+    /*
+     * tagsType()
+     * @param void
+     * @return string Cache tag type throw CacheTagTypes namespace
+     */
+    function tagsType() {
+        return CacheTagTypes::FAST;
     }
     
     /*

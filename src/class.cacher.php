@@ -47,11 +47,6 @@ final class Cacher {
      */
     private    $Backend;
     /**
-     *  Backend name
-     *  @var string
-     */
-    private    $BackendName;
-    /**
      * Lifetime of this slot.
      * @var int
      */
@@ -83,10 +78,8 @@ final class Cacher {
       $Options = $SlotName($arg);
       
       $SelfObj = new Cacher();
-      $SelfObj->BackendName = $Options[0];
-      $SelfObj->LifeTime = $Options[1];
-      $SelfObj->Backend = self::setBackend($Options[0]/*BackendName*/, $Options[2]/*CacheKey*/);
-      
+      $SelfObj->LifeTime    = $Options[1];
+      $SelfObj->Backend     = self::setBackend($Options[0]/*BackendName*/, $Options[2]/*CacheKey*/);
       return $SelfObj;
     }
     
@@ -109,7 +102,7 @@ final class Cacher {
      * @return void
      */
     public function addTag(Cacher_Tag $tag) {
-        if ($tag->getBkName() == $this->BackendName) {
+        if ($tag->getBkName() == $this->Backend->tagsType()) {
             $this->Tags[] = $tag->getKey();
             return true;
         }
@@ -126,7 +119,7 @@ final class Cacher {
      * @param $CacheKey string
      */
     static function setBackend($BackendName, $CacheKey) {
-        require_once self::PATH_BACKENDS . strtolower($BackendName) . '/slot.php';
+        require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
         $BackendName = 'Cacher_Backend_'.$BackendName;
         return new $BackendName($CacheKey, self::NAME_SPACE);
     }

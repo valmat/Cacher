@@ -1,7 +1,7 @@
 <?php
 
 /*
- * class Cacher_Backend_MemReCache
+ * class Cacher_Backend_MemReCache0
  * 
  * Бэкенд класса Cacher для кеширования в memcache c безопасным перекешированием.
  * Для перекеширования используются блокировки.
@@ -10,11 +10,12 @@
  * Как и в Cacher_Backend_Memcache используются теги.
  * К кешируемому объекту добавляется параметр 'expire'. таким образом за истечением срока годности кеша должен следить не memcache,
  * а сам класс.
- * В отличии от Cacher_Backend_MemReCache0 в данном классе при удалении кеша по ключу происходит не фактическое удаление кеша на уравне
- * Memcache, а лишь сброс параметра Expire. За счет этого возможен сброс кеша без использования тегов с возможностью безгоночного перекеширования
+ * В данном бекенде удаление по ключу происходит безусловно. То есть. после вызова del перекеширование не возможно.
+ * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  CacheObj:
  *  'cache_key'=Array(
+ *      'expire' => ...
  *        'data' => ...
  *        'tags' => Array(
  *                       'tag1' => ...,
@@ -23,46 +24,44 @@
  *                       )
  *                  );
  * LockFlag:
- * '~lock'.'cache_key' = true/false
- * Expire:
- * '~xpr'.'cache_key' = ...
+ * '~lock'.'cache_key' = 1
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * 
  */
 
-class Cacher_Backend_MemReCache extends Cacher_Backend {
+class Cacher_Backend_MemReCache0 extends Cacher_Backend{
     
     private static $memcache=null;
     
-    const NAME      = 'MemReCache';
+    const NAME      = 'MemReCache0';
+    
     /**
       * сжатие memcache
       */
     const COMPRES   = false;//MEMCACHE_COMPRESSED;
+    
     /**
       * Префикс для формирования ключа блокировки
       */
-    const LOCK_PREF = CONFIG_Cacher_BK_MemReCache::LOCK_PREF;
+    const LOCK_PREF = CONFIG_Cacher_BK_MemReCache0::LOCK_PREF;
+    
     /**
       * Время жизни ключа блокировки. Если во время перестроения кеша процесс аварийно завершится,
       * то блокировка останется включенной и другие процессы будут продолжать выдавать протухший кеш LOCK_TIME секунд.
       * С другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состояние гонки и блокировочный механизм перестанет работать.
       * Т.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
       */
-    const LOCK_TIME = CONFIG_Cacher_BK_MemReCache::LOCK_TIME;
+    const LOCK_TIME = CONFIG_Cacher_BK_MemReCache0::LOCK_TIME;
+    
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
-    const MAX_LTIME = CONFIG_Cacher_BK_MemReCache::MAX_LTIME;
-    /**
-      * EXPIRE PREFIX - префикс для хранения ключа со временем истечения кеша
-      */
-    const EXPR_PREF = CONFIG_Cacher_BK_MemReCache::EXPR_PREF;
+    const MAX_LTIME = CONFIG_Cacher_BK_MemReCache0::MAX_LTIME;
     
     /**
       * Флаг установленной блокировки
       * После установки этот флаг помечается в true
-      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
+      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $this->key)]
       * Затем флаг блокировки должен быть снят: $this->is_locked = false;
       */
     private        $is_locked = false;
@@ -81,23 +80,17 @@ class Cacher_Backend_MemReCache extends Cacher_Backend {
      */
     private function set_lock() {
         if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $this->key)) )
-           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key,true,false,self::LOCK_TIME);
+           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key, true, false, self::LOCK_TIME);
         return $this->is_locked;
     }
     
     function get(){
-        # Если объекта в кеше не нашлось, то безусловно перекешируем
-        # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
-        //if( false===( $c_arr = self::$memcache->get( Array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) || !isset($c_arr[self::EXPR_PREF . $this->key]) ){
-        if( false===( $cobj=self::$memcache->get($this->key) ) ){
+        # если объекта в кеше не нашлось, то безусловно перекешируем
+        if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
-        }
 
-        //$cobj   = $c_arr[$this->key];
-        //$expire = $c_arr[self::EXPR_PREF . $this->key];
-        
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
-        if( false===( $expire=self::$memcache->get(self::EXPR_PREF . $this->key) ) || $expire < time() ){
+        if($cobj['expire'] < time()){
           # Пытаемся установить блокировку
           # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
           if($this->set_lock())
@@ -154,21 +147,20 @@ class Cacher_Backend_MemReCache extends Cacher_Backend {
                     self::$memcache->set( $tags[$i], $thetime, false, 0 );
                   }
           }
-        $expire = (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime);
         $cobj = Array(
+                      'expire' => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime),
                       'data' => $CacheVal,
                       'tags' => $tags_mc
                      );
-        
-        self::$memcache->set(self::EXPR_PREF.$this->key, $expire, false, 0);
         self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
-        
+
         if($this->is_locked){
             $this->is_locked = false;
             self::$memcache->delete(self::LOCK_PREF . $this->key);
         }
         
         return $CacheVal;
+
     }
     
     /*
@@ -176,11 +168,18 @@ class Cacher_Backend_MemReCache extends Cacher_Backend {
      * function del
      */
     function del(){
-        //return self::$memcache->delete($CacheKey);
-        //return self::$memcache->set(self::EXPR_PREF.$CacheKey, 0, false, 0);
-        return self::$memcache->delete(self::EXPR_PREF . $this->key);
+        return self::$memcache->delete($this->key);
     }
     
+    /*
+     * tagsType()
+     * @param void
+     * @return string Cache tag type throw CacheTagTypes namespace
+     */
+    function tagsType() {
+        return CacheTagTypes::FAST;
+    }
+
 }
 
 ?>

@@ -7,7 +7,8 @@
   *  Вынесение их в отдельную сущьность сделано для того, что бы значения кеширования устанавливлись прозрачно для программы,
   *  а управление ими не было распределно по разным частям кода.
   *  
-  *  Используется: Cacher::_setOption($BackendName, $LifeTime, $key)
+  *  Используется: Cacher::setOption($BackendName, $LifeTime, $key)
+  *  where $BackendTagName in {'Memcache', 'empty'}
   */
 
 
