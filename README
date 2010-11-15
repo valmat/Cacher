@@ -33,20 +33,19 @@ Backend can be a file system, shared memory, memcache, Sqlite, and other cachein
 	*	Example:
 
 
-Cacher::Slot('AniObj',AniObj);
+$slot = Cacher::create('User',$User);
 
 //Get data
-if (false === ($CacheData = Cacher::get())) {
-	$CacheData = GetFromAnyExternal();
-	Cacher::addTag(Cacher::newTag('AniTagData',AniTagDataObj));
-	$tag2 = Cacher::newTag('AniTagData2',AniTagDataObj1)
-	Cacher::addTag($tag2);
-	Cacher::set($CacheData);
+if (false === ($CacheData = $slot->get())) { 
+       $CacheData = GetFromAnyExternal();
+       $slot->addTag(Cacher_Tag::create('SmplTag',  $User));
+       $slot->addTag(Cacher_Tag::create('SmplTag1', $User));
+       $slot->set($CacheData);
 }
  ...
  ...
  If you then need to reset some a tag, you will need to do so: 
- Cacher::newTag('AniTagData2',AniTagDataObj1)->clear() // Clear cache of tag
+ Cacher_Tag::create('AniTagData', $AniTagDataObj)->clear() // Clear cache of tag
 
 ------------------
 More details on the Russian: http://www.valmat.ru/2010/10/php-cacher.html
