@@ -126,7 +126,7 @@ final class Cacher {
      * @param $CacheKey string
      */
     static function setBackend($BackendName, $CacheKey) {
-        require_once self::PATH_BACKENDS . strtolower($BackendName) . '/slot.php';
+        require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
         $BackendName = 'Cacher_Backend_'.$BackendName;
         return new $BackendName($CacheKey, self::NAME_SPACE);
     }
