@@ -45,7 +45,7 @@ if (false === ($CacheData = $slot->get())) {
  ...
  ...
  If you then need to reset some a tag, you will need to do so: 
- Cacher_Tag::create('AniTagData', $AniTagDataObj)->clear() // Clear cache of tag
+ Cacher_Tag::create('AnyTagData', $AnyTagDataObj)->clear() // Clear cache of tag
 
 ------------------
 More details on the Russian: http://www.valmat.ru/2010/10/php-cacher.html
