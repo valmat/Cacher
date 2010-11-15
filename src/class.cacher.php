@@ -47,11 +47,6 @@ final class Cacher {
      */
     private    $Backend;
     /**
-     *  Backend name
-     *  @var string
-     */
-    private    $BackendName;
-    /**
      * Lifetime of this slot.
      * @var int
      */
@@ -83,14 +78,9 @@ final class Cacher {
       $Options = $SlotName($arg);
       
       $SelfObj = new Cacher();
-      $SelfObj->BackendName = $Options[0];
       $SelfObj->LifeTime    = $Options[1];
       $SelfObj->Backend     = self::setBackend($Options[0]/*BackendName*/, $Options[2]/*CacheKey*/);
-      echo "<hr><pre>";
-      var_export($SelfObj->Backend->tagsType() );
-      echo "<hr></pre>";
       return $SelfObj;
-    
     }
     
     /*
@@ -112,9 +102,6 @@ final class Cacher {
      * @return void
      */
     public function addTag(Cacher_Tag $tag) {
-        echo "<hr><pre>";
-        var_export(Array($tag->getBkName(),$this->BackendName));
-        echo "<hr></pre>";
         if ($tag->getBkName() == $this->Backend->tagsType()) {
             $this->Tags[] = $tag->getKey();
             return true;
