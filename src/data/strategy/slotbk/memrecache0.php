@@ -171,6 +171,15 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
         return self::$memcache->delete($this->key);
     }
     
+    /*
+     * tagType()
+     * @param void
+     * @return string Cache tag type throw CacheTagTypes namespace
+     */
+    function tagType() {
+        return CacheTagTypes::FAST;
+    }
+
 }
 
 ?>

@@ -38,8 +38,7 @@ class Cacher_Backend_Memcache  extends Cacher_Backend{
     
     const NAME    = 'Memcache';
     const COMPRES = false;//MEMCACHE_COMPRESSED;
-    
-    
+       
     function __construct($CacheKey, $nameSpace) {
         parent::__construct($CacheKey, $nameSpace);
         $this->key = $nameSpace . $CacheKey;
@@ -115,6 +114,14 @@ class Cacher_Backend_Memcache  extends Cacher_Backend{
         return self::$memcache->delete($this->key);
     }
     
+    /*
+     * tagType()
+     * @param void
+     * @return string Cache tag type throw CacheTagTypes namespace
+     */
+    function tagType() {
+        return CacheTagTypes::FAST;
+    }    
 }
 
 ?>

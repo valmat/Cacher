@@ -39,6 +39,7 @@ class Cacher_Backend_MemReCache extends Cacher_Backend {
       * сжатие memcache
       */
     const COMPRES   = false;//MEMCACHE_COMPRESSED;
+    
     /**
       * Префикс для формирования ключа блокировки
       */
@@ -180,6 +181,15 @@ class Cacher_Backend_MemReCache extends Cacher_Backend {
         //return self::$memcache->set(self::EXPR_PREF.$CacheKey, 0, false, 0);
         return self::$memcache->delete(self::EXPR_PREF . $this->key);
     }
+    
+    /*
+     * tagType()
+     * @param void
+     * @return string Cache tag type throw CacheTagTypes namespace
+     */
+    function tagType() {
+        return CacheTagTypes::FAST;
+    }    
     
 }
 

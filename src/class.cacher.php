@@ -92,8 +92,11 @@ final class Cacher {
       $SelfObj->bkTagName   = $Options[1];
       $SelfObj->LifeTime    = $Options[2];
       $SelfObj->Backend     = self::setBackend($Options[0]/*BackendName*/, $Options[3]/*CacheKey*/);
-      
+      echo "<hr><pre>";
+      var_export($SelfObj->Backend->tagType() );
+      echo "<hr></pre>";
       return $SelfObj;
+    
     }
     
     /*
@@ -116,9 +119,9 @@ final class Cacher {
      */
     public function addTag(Cacher_Tag $tag) {
         echo "<hr><pre>";
-        var_export(Array($tag->getBkName(),$this->BackendName));
+        var_export(Array($tag->getBkName(),$this->BackendName, $this->bkTagName));
         echo "<hr></pre>";
-        if ($tag->getBkName() == $this->BackendName) {
+        if ($tag->getBkName() == $this->bkTagName) {
             $this->Tags[] = $tag->getKey();
             return true;
         }
