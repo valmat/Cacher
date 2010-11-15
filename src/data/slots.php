@@ -7,7 +7,8 @@
   *  Вынесение их в отдельную сущьность сделано для того, что бы значения кеширования устанавливлись прозрачно для программы,
   *  а управление ими не было распределно по разным частям кода.
   *  
-  *  Используется: Cacher::_setOption($BackendName, $LifeTime, $key)
+  *  Используется: Cacher::setOption($BackendName, $BackendTagName, $LifeTime, $key)
+  *  where $BackendTagName in {'Memcache', 'empty'}
   */
 
 
@@ -17,11 +18,11 @@
      */
         
     function Cacher_Slot_User(User $arg) {
-       return Cacher::setOption(CacheTypes::FAST , 10, "user_{$arg->id}");
+       return Cacher::setOption(CacheTypes::FAST , 'Memcache', 10, "user_{$arg->id}");
     }
         
     function Cacher_Slot_User1(User1 $arg) {
-       return Cacher::setOption(CacheTypes::FAST , 10, "user_{$arg->id}");
+       return Cacher::setOption(CacheTypes::FAST , 'Memcache', 10, "user_{$arg->id}");
     }    
 
 ?>
