@@ -52,11 +52,6 @@ final class Cacher {
      */
     private    $BackendName;
     /**
-     *  Tag backend name
-     *  @var string
-     */
-    private    $bkTagName;
-    /**
      * Lifetime of this slot.
      * @var int
      */
@@ -89,9 +84,8 @@ final class Cacher {
       
       $SelfObj = new Cacher();
       $SelfObj->BackendName = $Options[0];
-      $SelfObj->bkTagName   = $Options[1];
-      $SelfObj->LifeTime    = $Options[2];
-      $SelfObj->Backend     = self::setBackend($Options[0]/*BackendName*/, $Options[3]/*CacheKey*/);
+      $SelfObj->LifeTime    = $Options[1];
+      $SelfObj->Backend     = self::setBackend($Options[0]/*BackendName*/, $Options[2]/*CacheKey*/);
       echo "<hr><pre>";
       var_export($SelfObj->Backend->tagType() );
       echo "<hr></pre>";
@@ -107,8 +101,8 @@ final class Cacher {
      * @param $LifeTime int
      * @param $key string
      */
-    static function setOption($BackendName, $BackendTagName, $LifeTime, $key) {
-        return Array($BackendName, $BackendTagName, $LifeTime, $key);
+    static function setOption($BackendName, $LifeTime, $key) {
+        return Array($BackendName, $LifeTime, $key);
     }
   
     /**
@@ -119,9 +113,9 @@ final class Cacher {
      */
     public function addTag(Cacher_Tag $tag) {
         echo "<hr><pre>";
-        var_export(Array($tag->getBkName(),$this->BackendName, $this->bkTagName));
+        var_export(Array($tag->getBkName(),$this->BackendName));
         echo "<hr></pre>";
-        if ($tag->getBkName() == $this->bkTagName) {
+        if ($tag->getBkName() == $this->Backend->tagType()) {
             $this->Tags[] = $tag->getKey();
             return true;
         }
