@@ -38,17 +38,7 @@
         /**
           * CACHE PATH - Путь к дериктории хранения кеша. В конце обратный слеш '/'
           */
-        const CACHE_PATH  = './.tmp';
-        
-        /**
-          * TMP PATH - Путь к папке со временными файлами
-          */
-        const TMP_PATH    = '/tmp';
-        
-        /**
-          * CACHE EXTENTION - Расширение для файлов кеша
-          */
-        const C_EXT       = '.cache';
+        const CACHE_PATH  = './.fcache';
         
         /**
           * Cache file path depth - Глубина вложенности файлов с кешем

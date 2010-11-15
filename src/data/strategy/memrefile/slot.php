@@ -65,17 +65,10 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
       * EXPIRE PREFIX - префикс для хранения ключа со временем истечения кеша
       */
     const EXPR_PREF = CONFIG_Cacher_BK_MemReFile::EXPR_PREF;
-    
     /**
       * CACHE PATH - Путь к дериктории хранения кеша
       */
     const CACHE_PATH = CONFIG_Cacher_BK_MemReFile::CACHE_PATH;
-
-    /**
-      * TMP PATH - Путь к папке со временными файлами
-      */
-    const TMP_PATH   = CONFIG_Cacher_BK_MemReFile::TMP_PATH;
-    
     /**
       * Cache file path depth - Глубина вложенности файлов с кешем
       */
@@ -209,7 +202,6 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
             for($i=0; $i<=self::CF_DEPTH; $i++){
                 if(!is_dir($thedir .= '/' . $this->patharr[$i]))
                    mkdir($thedir, 0700);
-                echo "<hr>$thedir";
             }
             $tmp_file = tempnam($thedir, 'fctmp_');
             file_put_contents($tmp_file, serialize($CacheVal) );
@@ -239,8 +231,6 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
      * @param $arg
      */
     private function getPath() {
-        //echo sha1($this->key);
-        
         if(''==$this->fullpath){
             $this->patharr[] = $this->nameSpace;
             $sha1 = sha1($this->key);
@@ -252,10 +242,6 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
             $this->fullpath = self::CACHE_PATH .'/'. implode('/',$this->patharr);
             
         }
-        
-        echo "<hr>".$this->fullpath."<pre>";
-        var_export($this->patharr);
-        echo '</pre><hr>';
     }
     
 }

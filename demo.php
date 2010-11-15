@@ -63,7 +63,7 @@ function print_time($cmnt = ''){
        
        public $id;
        function __construct($id=5) {
-           $this->id = rand(1,20000);
+           $this->id = $id;//rand(1,20000);
        }
     }
     
