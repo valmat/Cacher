@@ -16,7 +16,7 @@ class Cache_Tag_Backend_Memcache  implements Cache_Tag_Backend{
     }
 
     /*
-     * Очистка кеша по тегу
+     * РћС‡РёСЃС‚РєР° РєРµС€Р° РїРѕ С‚РµРіСѓ
      * function clearTag
      * @param $tagKey string
      */

@@ -2,9 +2,9 @@
 
 /*
  * class Cacher_Backend_notag_Memcache
- * Бэкенд класса Cacher для кеширования в memcache
+ * Р‘СЌРєРµРЅРґ РєР»Р°СЃСЃР° Cacher РґР»СЏ РєРµС€РёСЂРѕРІР°РЅРёСЏ РІ memcache
  *
- * В этом бекенде теги не поддерживаются. По суи простая обертка для memcache
+ * Р’ СЌС‚РѕРј Р±РµРєРµРЅРґРµ С‚РµРіРё РЅРµ РїРѕРґРґРµСЂР¶РёРІР°СЋС‚СЃСЏ. РџРѕ СЃСѓРё РїСЂРѕСЃС‚Р°СЏ РѕР±РµСЂС‚РєР° РґР»СЏ memcache
  * 
  */
 
@@ -22,11 +22,11 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
     }
 
     /*
-     * Получение кеша
+     * РџРѕР»СѓС‡РµРЅРёРµ РєРµС€Р°
      * function get
      */
     function get(){
-        # если объекта в кеше не нашлось
+        # РµСЃР»Рё РѕР±СЉРµРєС‚Р° РІ РєРµС€Рµ РЅРµ РЅР°С€Р»РѕСЃСЊ
         if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
         
@@ -34,7 +34,7 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
     }
 
     /*
-     * Установка значения кеша по ключу вместе с тегами и указанием срока годности кеша
+     * РЈСЃС‚Р°РЅРѕРІРєР° Р·РЅР°С‡РµРЅРёСЏ РєРµС€Р° РїРѕ РєР»СЋС‡Сѓ РІРјРµСЃС‚Рµ СЃ С‚РµРіР°РјРё Рё СѓРєР°Р·Р°РЅРёРµРј СЃСЂРѕРєР° РіРѕРґРЅРѕСЃС‚Рё РєРµС€Р°
      * function set
      * @param $CacheVal string
      * @param $tags array
@@ -46,7 +46,7 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
     }
     
     /*
-     * Удаление кеша по собственному ключу
+     * РЈРґР°Р»РµРЅРёРµ РєРµС€Р° РїРѕ СЃРѕР±СЃС‚РІРµРЅРЅРѕРјСѓ РєР»СЋС‡Сѓ
      * function del
      */
     function del(){
