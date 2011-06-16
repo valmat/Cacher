@@ -50,7 +50,7 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      * function del
      */
     function del(){
-        return self::$memcache->delete($this->key);
+        return self::$memcache->delete($this->key, 0);
     }
     
     /*

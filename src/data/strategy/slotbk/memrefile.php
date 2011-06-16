@@ -213,7 +213,7 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
         # Ñíèìàåì áëîêèğîâêó
         if($this->is_locked){
             $this->is_locked = false;
-            self::$memcache->delete(self::LOCK_PREF . $this->key);
+            self::$memcache->delete(self::LOCK_PREF . $this->key, 0);
         }
         
         return $CacheVal;
@@ -224,7 +224,7 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
      * function del
      */
     function del(){
-        return self::$memcache->delete(self::EXPR_PREF . $this->key);
+        return self::$memcache->delete(self::EXPR_PREF . $this->key, 0);
     }
     
     /*
