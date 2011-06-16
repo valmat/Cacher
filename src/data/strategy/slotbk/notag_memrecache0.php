@@ -1,13 +1,18 @@
 <?php
 
 /*
- * class Cacher_Backend_MemReCache0
+ * class Cacher_Backend_notag_MemReCache0
+ *
+ * В этом бекенде ТЕГИ НЕ ПОДДЕРЖИВАЮТСЯ.
+ * Если нужны теги, используйте Cacher_Backend_MemReCache0
+ *
+ * В отличии от Cacher_Backend_notag_MemReCache, этот слот больше расчитан на
+ * безгоночное перекеширование при протухании чем при удалении кеша
  * 
  * Бэкенд класса Cacher для кеширования в memcache c безопасным перекешированием.
  * Для перекеширования используются блокировки.
  * Таким образом исключается состаяние гонки и обновлением кеша занимается только один процесс.
  * Тем временем другие процессы временно используют устаревший кеш.
- * Как и в Cacher_Backend_Memcache используются теги.
  * К кешируемому объекту добавляется параметр 'expire'. таким образом за истечением срока годности кеша должен следить не memcache,
  * а сам класс.
  * В данном бекенде удаление по ключу происходит безусловно. То есть. после вызова del перекеширование не возможно.
@@ -15,25 +20,20 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *  CacheObj:
  *  'cache_key'=Array(
- *      'expire' => ...
- *        'data' => ...
- *        'tags' => Array(
- *                       'tag1' => ...,
- *                       'tag2' => ...,
- *                       'tag3' => ...
- *                       )
+ *      0 => <cached data>
+ *      1 => <expire>
  *                  );
  * LockFlag:
- * '~lock'.'cache_key' = 1
+ * '~lock'.'cache_key' = true/false
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * 
  */
 
-class Cacher_Backend_MemReCache0 extends Cacher_Backend{
+class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
     
     private static $memcache=null;
     
-    const NAME      = 'MemReCache0';
+    const NAME      = 'notag_MemReCache0';
     
     /**
       * сжатие memcache
@@ -86,42 +86,17 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
     
     function get(){
         # если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===($cobj = self::$memcache->get($this->key)) )
+        if( false===($cobj = self::$memcache->get($this->key)) || !isset($cobj[0]) || !isset($cobj[1]) )
            return false;
-
+        list($rez, $expire) = $cobj;
+        
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
-        if($cobj['expire'] < time()){
-          # Пытаемся установить блокировку
-          # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-          if($this->set_lock())
-            return false;
-          return $cobj['data'];
+        # Пытаемся установить блокировку
+        # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
+        if($expire < time() && $this->set_lock()){
+          return false;
         }
-        $tags = $cobj['tags'];
-        $tags_cnt = count($tags);
-        
-        # Если тегов нет, то просто отдаем объект. Тогда дальше можно считать 0!=$tags_cnt
-        if(0==$tags_cnt)
-          return $cobj['data'];
-
-        $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
-        # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
-        if( count($tags_mc)!= $tags_cnt){
-          if($this->set_lock())
-            return false;
-          return $cobj['data'];        
-        }
-        
-        # Если кеш протух по тегам, то сообщаем об этом
-        foreach($tags as $tag_k => $tag_v){
-            if($tags_mc[$tag_k]>$tag_v){
-              if($this->set_lock())
-                 return false;
-              return $cobj['data'];        
-            }
-        }
-
-        return $cobj['data'];
+        return $rez;
     }
     
     /*
@@ -132,28 +107,14 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
      */
     function set($CacheVal, $tags, $LifeTime){
         $thetime = time();
-        # проверяем наличие тегов и при необходимости устанавливаем их
-        $tags_cnt = count($tags);
         
-        if( 0==$tags_cnt || false===($tags_mc = self::$memcache->get( $tags )) )
-           $tags_mc = Array();
-        
-        if( $tags_cnt>0 && count($tags_mc)!= $tags_cnt)
-          {
-            for($i=0;$i<$tags_cnt;$i++)
-               if(!isset($tags_mc[$tags[$i]]))
-                  {
-                    $tags_mc[$tags[$i]] = $thetime;
-                    self::$memcache->set( $tags[$i], $thetime, false, 0 );
-                  }
-          }
         $cobj = Array(
-                      'expire' => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime),
-                      'data' => $CacheVal,
-                      'tags' => $tags_mc
+                      0 => $CacheVal,
+                      1 => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime)
                      );
         self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
-
+        
+        # Сбрасываем блокировку
         if($this->is_locked){
             $this->is_locked = false;
             self::$memcache->delete(self::LOCK_PREF . $this->key, 0);
@@ -164,7 +125,8 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
     }
     
     /*
-     * Полная очистка текущего кеша без поддержки переекеширования. Если нужно удаление с перекешированием, то нужно использовать теги
+     * Полная очистка текущего кеша без поддержки переекеширования.
+     * Удаление с перекешированием в этом слоте не поддерживается
      * function del
      */
     function del(){
@@ -177,7 +139,7 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
      * @return string Cache tag type throw CacheTagTypes namespace
      */
     function tagsType() {
-        return CacheTagTypes::FAST;
+        return CacheTagTypes::NOTAG;
     }
 
 }
