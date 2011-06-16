@@ -237,8 +237,10 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
     }
     
     /*
+     * Устанавливает $patharr и $fullpath
      * function getPath
-     * @param $arg
+     * @param void
+     * @return void
      */
     private function getPath() {
         if(''==$this->fullpath){
