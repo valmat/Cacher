@@ -111,7 +111,7 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
         return $this->is_locked;
     }
     
-    function get(){
+    protected function singleGet() {
         # Если объекта в мем кеше не нашлось, то ищем в файле
         # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
         //if( false===( $c_arr = self::$memcache->get( Array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) || !isset($c_arr[self::EXPR_PREF . $this->key]) ){
@@ -142,7 +142,7 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
         # Если тегов нет, то просто отдаем объект. Тогда дальше можно считать 0!=$tags_cnt
         if(0==$tags_cnt)
           return $cobj['data'];
-
+        
         $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
@@ -159,8 +159,16 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
               return $cobj['data'];        
             }
         }
-
+        
         return $cobj['data'];
+    }
+    
+    /*
+     * Получение кеша для мультиключа
+     * function get
+     */
+    protected function multiGet(){
+        #
     }
     
     /*

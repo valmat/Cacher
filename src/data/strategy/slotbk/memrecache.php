@@ -86,7 +86,7 @@ class Cacher_Backend_MemReCache extends Cacher_Backend {
         return $this->is_locked;
     }
     
-    function get(){
+    protected function singleGet() {
         # Если объекта в кеше не нашлось, то безусловно перекешируем
         # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
         //if( false===( $c_arr = self::$memcache->get( Array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) || !isset($c_arr[self::EXPR_PREF . $this->key]) ){
@@ -128,8 +128,16 @@ class Cacher_Backend_MemReCache extends Cacher_Backend {
               return $cobj['data'];        
             }
         }
-
+        
         return $cobj['data'];
+    }
+    
+    /*
+     * Получение кеша для мультиключа
+     * function get
+     */
+    protected function multiGet(){
+        #
     }
     
     /*

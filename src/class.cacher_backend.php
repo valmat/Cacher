@@ -14,7 +14,24 @@ abstract class Cacher_Backend
      * Получить значение кеша если есть, или false, если отсутствует.
      * function get
      */
-    abstract function get();
+    public function get() {
+        return (is_array($this->key))?$this->multiGet():$this->singleGet();
+    }
+    
+    /*
+     * Получить значение кеша если есть, или false, если отсутствует.
+     * Используется, когда передается строковой ключ
+     * function get
+     */
+    abstract protected function singleGet();
+        
+    /*
+     * Получить значение кеша если есть, или false, если отсутствует.
+     * Используется, когда передается массив ключей
+     * function get
+     */
+    abstract protected function multiGet();
+    
     /*
      * Установить данные в кеш
      * function set
@@ -23,11 +40,13 @@ abstract class Cacher_Backend
      * @param $LifeTime int     Время жизни кеша
      */
     abstract function set($CacheVal, $tags, $LifeTime);
+    
     /*
      * Очистить кеш по ключу
      * function del
      */
     abstract function del();
+    
     /*
      * Тип используемых тегов. Знание о тегах должно храниться именно в слоте
      * tagsType()

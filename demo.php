@@ -108,7 +108,7 @@ echo '</pre><hr>';
 ################################################################################
 
 echo '<br>';
-echo '<hr>memory usage: '.(memory_get_usage()/1024-$memory_get_usage_start) .'Кб<br>';
+echo '<hr>memory usage: '.(memory_get_usage()/1024-$memory_get_usage_start) .'Kb<br>';
     print_time('end script work');
 
 ?>

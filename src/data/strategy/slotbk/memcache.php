@@ -49,7 +49,7 @@ class Cacher_Backend_Memcache  extends Cacher_Backend{
      * Получение кеша
      * function get
      */
-    function get(){
+    protected function singleGet() {
         # если объекта в кеше не нашлось
         if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
@@ -73,6 +73,14 @@ class Cacher_Backend_Memcache  extends Cacher_Backend{
         }
         
         return $cobj['data'];
+    }
+    
+    /*
+     * Получение кеша для мультиключа
+     * function get
+     */
+    protected function multiGet(){
+        #
     }
 
     /*

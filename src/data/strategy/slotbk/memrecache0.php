@@ -84,7 +84,7 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
         return $this->is_locked;
     }
     
-    function get(){
+    protected function singleGet() {
         # если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
@@ -103,7 +103,7 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
         # Если тегов нет, то просто отдаем объект. Тогда дальше можно считать 0!=$tags_cnt
         if(0==$tags_cnt)
           return $cobj['data'];
-
+        
         $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
@@ -120,8 +120,16 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
               return $cobj['data'];        
             }
         }
-
+        
         return $cobj['data'];
+    }
+    
+    /*
+     * Получение кеша для мультиключа
+     * function get
+     */
+    protected function multiGet(){
+        #
     }
     
     /*
@@ -153,14 +161,13 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
                       'tags' => $tags_mc
                      );
         self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
-
+        
         if($this->is_locked){
             $this->is_locked = false;
             self::$memcache->delete(self::LOCK_PREF . $this->key, 0);
         }
         
         return $CacheVal;
-
     }
     
     /*

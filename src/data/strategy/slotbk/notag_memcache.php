@@ -25,14 +25,22 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      * Получение кеша
      * function get
      */
-    function get(){
+    protected function singleGet(){
         # если объекта в кеше не нашлось
         if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
         
         return $cobj;
     }
-
+    
+    /*
+     * Получение кеша для мультиключа
+     * function get
+     */
+    protected function multiGet(){
+        #
+    }
+    
     /*
      * Установка значения кеша по ключу вместе с тегами и указанием срока годности кеша
      * function set

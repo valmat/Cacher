@@ -84,7 +84,7 @@ class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
         return $this->is_locked;
     }
     
-    function get(){
+    protected function singleGet(){
         # если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===($cobj = self::$memcache->get($this->key)) || !isset($cobj[0]) || !isset($cobj[1]) )
            return false;
@@ -97,6 +97,14 @@ class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
           return false;
         }
         return $rez;
+    }
+    
+    /*
+     * Получение кеша для мультиключа
+     * function get
+     */
+    protected function multiGet(){
+        #
     }
     
     /*
