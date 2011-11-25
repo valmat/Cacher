@@ -39,6 +39,9 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      */
     protected function multiGet(){
         #
+        echo "<hr><pre>";
+        var_export($this->key);
+        echo '</pre><hr>';
     }
     
     /*

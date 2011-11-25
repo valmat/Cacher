@@ -73,26 +73,29 @@ function print_time($cmnt = ''){
         return Array('username','userid'=>$User->id, date('h:i:s A') );
     }
     
-    $User = new User();
+    $User1 = new User(1);
+    $User2 = new User(2);
+    $User3 = new User(3);
     //Cacher::Slot('User',$User);
+    $keys = array($User1->id,$User2->id,$User3->id);
+    $slot = Cacher::create('User', $keys);
+    $CacheData = $slot->get();
+    foreach($CacheData as $key => $rez) {
+        if (false === $rez) {
+             $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
+             //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+             //$slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+             
+             //Cacher_Tag::create('SmplTag', $User)->getKey();
+             
+             //sleep(1);// hard data
+             
+             echo '<hr><font color=blue>to cache</font><hr>';
+               
+             $slot->set($rez, $key);
+        }
+    }
     
-    $slot = Cacher::create('User',$User->id);
-
-    if (false === ($CacheData = $slot->get()))// Если данные из кеша получить не удалось...
-    { 
-         $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
-         //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-         //$slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-         
-         //Cacher_Tag::create('SmplTag', $User)->getKey();
-         
-         //sleep(1);// hard data
-         
-         echo '<hr><font color=blue>to cache</font><hr>';
-           
-         $slot->set($CacheData);                                    // Кешируем данные
-         
-     }
     //$slot->del();
     
     //Cacher_Tag::create('SmplTag',$User)->clear();
