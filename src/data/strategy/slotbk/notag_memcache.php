@@ -10,14 +10,9 @@
 class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
     
     private static $memcache=null;
-    
-    const NAME    = 'notag_Memcache';
-    const COMPRES = false;//MEMCACHE_COMPRESSED;
        
-    function __construct($CacheKey, $nameSpace) {
-        parent::__construct($CacheKey, $nameSpace);
-        //$this->key = $nameSpace .'nt'. $CacheKey;
-        $this->key = $CacheKey;
+    function __construct($CacheKey) {
+        parent::__construct($CacheKey);
         self::$memcache = Mcache::init();
     }
 
@@ -27,13 +22,9 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      */
     protected function singleGet(){
         # если объекта в кеше не нашлось
-        echo "<hr><pre>";
-        var_export(545);
-        echo '</pre><hr>';
         if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
         
-        return array();
         return $cobj;
     }
     
@@ -57,7 +48,7 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      * @param $LifeTime int
      */
     function set($CacheVal, $tags, $LifeTime){
-        self::$memcache->set($this->key, $CacheVal, self::COMPRES, $LifeTime);
+        self::$memcache->set($this->key, $CacheVal, Mcache::COMPRES, $LifeTime);
         return $CacheVal;
     }
     

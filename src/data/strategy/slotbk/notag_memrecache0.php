@@ -33,13 +33,6 @@ class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
     
     private static $memcache=null;
     
-    const NAME      = 'notag_MemReCache0';
-    
-    /**
-      * сжатие memcache
-      */
-    const COMPRES   = false;//MEMCACHE_COMPRESSED;
-    
     /**
       * Префикс для формирования ключа блокировки
       */
@@ -66,9 +59,8 @@ class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
       */
     private        $is_locked = false;
     
-    function __construct($CacheKey, $nameSpace) {
-        parent::__construct($CacheKey, $nameSpace);
-        $this->key = $nameSpace . $CacheKey;
+    function __construct($CacheKey) {
+        parent::__construct($CacheKey);
         self::$memcache = Mcache::init();
     }
     
@@ -120,7 +112,7 @@ class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
                       0 => $CacheVal,
                       1 => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime)
                      );
-        self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
+        self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
         
         # Сбрасываем блокировку
         if($this->is_locked){

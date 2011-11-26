@@ -35,13 +35,9 @@
 class Cacher_Backend_Memcache  extends Cacher_Backend{
     
     private static $memcache=null;
-    
-    const NAME    = 'Memcache';
-    const COMPRES = false;//MEMCACHE_COMPRESSED;
        
-    function __construct($CacheKey, $nameSpace) {
-        parent::__construct($CacheKey, $nameSpace);
-        $this->key = $nameSpace . $CacheKey;
+    function __construct($CacheKey) {
+        parent::__construct($CacheKey);
         self::$memcache = Mcache::init();
     }
 
@@ -110,7 +106,7 @@ class Cacher_Backend_Memcache  extends Cacher_Backend{
                       'data' => $CacheVal,
                       'tags' => $tags_mc
                      );
-        self::$memcache->set($this->key, $cobj, self::COMPRES, $LifeTime);
+        self::$memcache->set($this->key, $cobj, Mcache::COMPRES, $LifeTime);
         return $CacheVal;
     }
     

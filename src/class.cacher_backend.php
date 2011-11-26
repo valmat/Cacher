@@ -7,17 +7,14 @@
 
 abstract class Cacher_Backend {
     
-    private $key;
-    private $nameSpace;
+    protected $key;
+    protected $name;
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
      * function get
      */
     public function get() {
-        echo "<hr><pre>";
-        var_export($this->key);
-        echo '</pre><hr>';
         echo (is_array($this->key))?'multiGet()':'singleGet()';
         return (is_array($this->key))?$this->multiGet():$this->singleGet();
     }
@@ -37,8 +34,8 @@ abstract class Cacher_Backend {
     abstract protected function multiGet();
     
     /*
-     * Установить данные в кеш
      * function set
+     * Установить данные в кеш
      * @param $CacheVal mixed   Данные кеша
      * @param $tags     array   Массив тегов кеширования
      * @param $LifeTime int     Время жизни кеша
@@ -46,14 +43,14 @@ abstract class Cacher_Backend {
     abstract function set($CacheVal, $tags, $LifeTime);
     
     /*
-     * Очистить кеш по ключу
      * function del
+     * Очистить кеш по ключу
      */
     abstract function del();
     
     /*
-     * Тип используемых тегов. Знание о тегах должно храниться именно в слоте
      * tagsType()
+     * Тип используемых тегов. Знание о тегах должно храниться именно в слоте
      * @param void
      * @return string Cache tag type throw CacheTagTypes namespace
      */
@@ -61,11 +58,12 @@ abstract class Cacher_Backend {
     
     /*
      * __construct()
-     * @param void
+     * @param $CacheKey string
      */
-    function __construct($CacheKey, $nameSpace) {
-        $this->key       = $CacheKey;
-        $this->nameSpace = $nameSpace;
+    function __construct($CacheKey) {
+        $class_name = get_class($this);
+        $this->name = substr($class_name,15, strlen($class_name));
+        $this->key  = $CacheKey;
     }
  }
 

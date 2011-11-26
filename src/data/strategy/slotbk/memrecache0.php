@@ -33,13 +33,6 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
     
     private static $memcache=null;
     
-    const NAME      = 'MemReCache0';
-    
-    /**
-      * сжатие memcache
-      */
-    const COMPRES   = false;//MEMCACHE_COMPRESSED;
-    
     /**
       * Префикс для формирования ключа блокировки
       */
@@ -66,9 +59,8 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
       */
     private        $is_locked = false;
     
-    function __construct($CacheKey, $nameSpace) {
-        parent::__construct($CacheKey, $nameSpace);
-        $this->key = $nameSpace . $CacheKey;
+    function __construct($CacheKey) {
+        parent::__construct($CacheKey);
         self::$memcache = Mcache::init();
     }
     
@@ -160,7 +152,7 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
                       'data' => $CacheVal,
                       'tags' => $tags_mc
                      );
-        self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
+        self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
         
         if($this->is_locked){
             $this->is_locked = false;

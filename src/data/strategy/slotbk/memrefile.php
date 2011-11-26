@@ -41,12 +41,6 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
     
     private static $memcache=null;
     
-    const NAME      = 'MemReFile';
-
-    /**
-      * сжатие memcache
-      */
-    const COMPRES   = false;//MEMCACHE_COMPRESSED;
     /**
       * Префикс для формирования ключа блокировки
       */
@@ -93,10 +87,8 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
       */
     private $patharr = Array();
     
-    function __construct($CacheKey, $nameSpace) {
-        //parent::__construct($CacheKey, $nameSpace);
-        $this->nameSpace = $nameSpace;        
-        $this->key = $nameSpace . $CacheKey;
+    function __construct($CacheKey) {
+        parent::__construct($CacheKey);
         self::$memcache = Mcache::init();
     }
     
@@ -201,7 +193,7 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
                      );
         
         self::$memcache->set(self::EXPR_PREF . $this->key, $expire, false, 0);
-        self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
+        self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
         
         # Пишем кеш в файл
         # Если блокировку установил текущий процесс, то пишем в файл
