@@ -5,8 +5,8 @@
  * 
  */
 
-abstract class Cacher_Backend
- {
+abstract class Cacher_Backend {
+    
     private $key;
     private $nameSpace;
         
@@ -15,6 +15,10 @@ abstract class Cacher_Backend
      * function get
      */
     public function get() {
+        echo "<hr><pre>";
+        var_export($this->key);
+        echo '</pre><hr>';
+        echo (is_array($this->key))?'multiGet()':'singleGet()';
         return (is_array($this->key))?$this->multiGet():$this->singleGet();
     }
     

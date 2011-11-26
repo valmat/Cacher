@@ -7,7 +7,6 @@
  * В этом бекенде теги не поддерживаются. По суи простая обертка для memcache
  * 
  */
-
 class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
     
     private static $memcache=null;
@@ -17,7 +16,8 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
        
     function __construct($CacheKey, $nameSpace) {
         parent::__construct($CacheKey, $nameSpace);
-        $this->key = $nameSpace .'nt'. $CacheKey;
+        //$this->key = $nameSpace .'nt'. $CacheKey;
+        $this->key = $CacheKey;
         self::$memcache = Mcache::init();
     }
 
@@ -27,9 +27,13 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      */
     protected function singleGet(){
         # если объекта в кеше не нашлось
+        echo "<hr><pre>";
+        var_export(545);
+        echo '</pre><hr>';
         if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
         
+        return array();
         return $cobj;
     }
     
@@ -39,9 +43,10 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      */
     protected function multiGet(){
         #
-        echo "<hr><pre>";
+        echo "<hr>{{{<pre>";
         var_export($this->key);
-        echo '</pre><hr>';
+        echo '</pre>}}}<hr>';
+        return array();
     }
     
     /*

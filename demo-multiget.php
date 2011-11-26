@@ -78,7 +78,7 @@ function print_time($cmnt = ''){
     $User3 = new User(3);
     //Cacher::Slot('User',$User);
     $keys = array($User1->id,$User2->id,$User3->id);
-    $slot = Cacher::create('User', $keys);
+    $slot = Cacher::create('Test', $keys);
     $CacheData = $slot->get();
     foreach($CacheData as $key => $rez) {
         if (false === $rez) {
@@ -112,6 +112,7 @@ echo '</pre><hr>';
 
 echo '<br>';
 echo '<hr>memory usage: '.(memory_get_usage()/1024-$memory_get_usage_start) .'Kb<br>';
+echo '<hr>memory peak_usage: '.(memory_get_peak_usage()/1024-$memory_get_usage_start) .'Kb<br>';
     print_time('end script work');
 
 ?>

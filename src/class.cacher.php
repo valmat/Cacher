@@ -70,16 +70,29 @@ final class Cacher {
      * @param $SlotName
      * @param $arg
      */
-    static function create($SlotName, $arg) {
+    static function create($SlotName, $arg='') {
       if (!defined('CACHER_SLOT_REQUIRED'))
         require self::PATH_SLOTS;
         
-      $SlotName = 'Cacher_Slot_'.$SlotName;
-      $Options = $SlotName($arg);
       
       $SelfObj = new Cacher();
-      $SelfObj->LifeTime    = $Options[1];
-      $SelfObj->Backend     = self::setBackend($Options[0]/*BackendName*/, $Options[2]/*CacheKey*/);
+      list($BackendName, $SelfObj->LifeTime) = call_user_func('Cacher_Slot_'.$SlotName);
+      if(is_array($arg)) {
+        $CacheKey = array();
+        foreach($arg as $key) {
+          $CacheKey[] = self::NAME_SPACE . $SlotName . ':' . $key;
+        }
+      } else {
+        $CacheKey = self::NAME_SPACE . $SlotName . ':' . $arg;
+      }
+      
+      //$SelfObj->Backend     = self::setBackend($BackendName, $CacheKey);
+      
+      require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
+      $BackendName = 'Cacher_Backend_'.$BackendName;
+      $SelfObj->Backend = new $BackendName($CacheKey, self::NAME_SPACE);
+      
+      
       return $SelfObj;
     }
     
@@ -91,10 +104,10 @@ final class Cacher {
      * @param $LifeTime int
      * @param $key string
      */
-    static function setOption($BackendName, $LifeTime, $key) {
-        return Array($BackendName, $LifeTime, $key);
-    }
-  
+    //static function setOption($BackendName, $LifeTime, $key) {
+    //    return Array($BackendName, $LifeTime, $key);
+    //}
+      
     /**
      * Добавляет тег к слоту
      * 
@@ -118,11 +131,11 @@ final class Cacher {
      * @param $BackendName string
      * @param $CacheKey string
      */
-    static function setBackend($BackendName, $CacheKey) {
-        require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
-        $BackendName = 'Cacher_Backend_'.$BackendName;
-        return new $BackendName($CacheKey, self::NAME_SPACE);
-    }
+    //static function setBackend($BackendName, $CacheKey) {
+    //    require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
+    //    $BackendName = 'Cacher_Backend_'.$BackendName;
+    //    return new $BackendName($CacheKey, self::NAME_SPACE);
+    //}
     
     /*
      * Get a data of this slot. If nothing is found, returns false.

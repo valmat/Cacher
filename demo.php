@@ -76,7 +76,7 @@ function print_time($cmnt = ''){
     $User = new User();
     //Cacher::Slot('User',$User);
     
-    $slot = Cacher::create('User',$User->id);
+    $slot = Cacher::create('Test',$User->id);
 
     if (false === ($CacheData = $slot->get()))// Если данные из кеша получить не удалось...
     { 

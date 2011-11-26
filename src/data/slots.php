@@ -12,17 +12,14 @@
   */
 
 
-    /***************************************************************************
-     * function cacher_slot_user
-     * @param $arg
-     */
+   /***************************************************************************
+    * function cacher_slot_user
+    * @param $arg
+    */
         
-    function Cacher_Slot_User($UserID) {
-       return Cacher::setOption(CacheTypes::FAST , 10, 'user_' . $UserID);
-    }
-        
-    function Cacher_Slot_User1(User1 $arg) {
-       return Cacher::setOption(CacheTypes::FAST , 10, 'user_' . $UserID);
-    }    
+   function Cacher_Slot_Test() {
+      //return Cacher::setOption(CacheTypes::FAST , 10, 'user_' . $UserID);
+      return array(CacheTypes::FAST , 10);
+   }
+      
 
-?>
