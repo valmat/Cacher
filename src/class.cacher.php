@@ -86,27 +86,11 @@ final class Cacher {
         $CacheKey = self::NAME_SPACE . $SlotName . ':' . $arg;
       }
       
-      //$SelfObj->Backend     = self::setBackend($BackendName, $CacheKey);
-      
       require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
       $BackendName = 'Cacher_Backend_'.$BackendName;
       $SelfObj->Backend = new $BackendName($CacheKey, self::NAME_SPACE);
-      
-      
       return $SelfObj;
     }
-    
-    /*
-     * function setOption
-     * Этот метод создан для использования в в Слоте
-     * 
-     * @param $Backend Cacher_Backend
-     * @param $LifeTime int
-     * @param $key string
-     */
-    //static function setOption($BackendName, $LifeTime, $key) {
-    //    return Array($BackendName, $LifeTime, $key);
-    //}
       
     /**
      * Добавляет тег к слоту
@@ -124,20 +108,6 @@ final class Cacher {
     }
     
     /*
-     * Фабричный метод создания бэкэнда
-     * Возвращает объект бэкенда по его имени. Попутно проверяет доступно ли использовать данное имя.
-     * Лучше всего использовать этот метод, чем создавать объект быкенда на прямую.
-     * function setBackend
-     * @param $BackendName string
-     * @param $CacheKey string
-     */
-    //static function setBackend($BackendName, $CacheKey) {
-    //    require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
-    //    $BackendName = 'Cacher_Backend_'.$BackendName;
-    //    return new $BackendName($CacheKey, self::NAME_SPACE);
-    //}
-    
-    /*
      * Get a data of this slot. If nothing is found, returns false.
      * Получить данные из кеша
      * function get
@@ -149,10 +119,9 @@ final class Cacher {
     }
     
     /*
+     * function set
      * Установить кешу значение $val
      * Saves a data for this slot. 
-     * 
-     * function set
      * @param mixed $val  Data to be saved.
      * @return bool - успешность операции
      */

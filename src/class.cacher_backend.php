@@ -8,7 +8,6 @@
 abstract class Cacher_Backend {
     
     protected $key;
-    protected $name;
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
@@ -22,14 +21,14 @@ abstract class Cacher_Backend {
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
      * Используется, когда передается строковой ключ
-     * function get
+     * function singleGet
      */
     abstract protected function singleGet();
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
      * Используется, когда передается массив ключей
-     * function get
+     * function multiGet
      */
     abstract protected function multiGet();
     
@@ -61,8 +60,6 @@ abstract class Cacher_Backend {
      * @param $CacheKey string
      */
     function __construct($CacheKey) {
-        $class_name = get_class($this);
-        $this->name = substr($class_name,15, strlen($class_name));
         $this->key  = $CacheKey;
     }
  }

@@ -176,7 +176,7 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
      * @return string Cache tag type throw CacheTagTypes namespace
      */
     function tagsType() {
-        return CacheTagTypes::FAST;
+        return CacheTagTypes::MC;
     }
 
 }

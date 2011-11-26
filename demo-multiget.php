@@ -73,6 +73,11 @@ function print_time($cmnt = ''){
         return Array('username','userid'=>$User->id, date('h:i:s A') );
     }
     
+    
+    echo "<hr><pre>";
+    var_export(Cacher_Tag::create('SmplTag', 51)->getKey());
+    echo '</pre><hr>';
+    
     $User1 = new User(1);
     $User2 = new User(2);
     $User3 = new User(3);
