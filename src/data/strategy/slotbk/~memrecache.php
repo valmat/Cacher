@@ -2,6 +2,8 @@
 
 /*
  * class Cacher_Backend_MemReCache
+ *
+ * ONLY FOR OLD VERSION PHP
  * 
  * Бэкенд класса Cacher для кеширования в memcache c безопасным перекешированием.
  * Для перекеширования используются блокировки.
@@ -85,15 +87,17 @@ class Cacher_Backend_MemReCache extends Cacher_Backend  {
     
     protected function singleGet() {
         # Если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===( $c_arr = self::$memcache->get( array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) || !isset($c_arr[self::EXPR_PREF . $this->key]) ){
+        # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
+        //if( false===( $c_arr = self::$memcache->get( array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) || !isset($c_arr[self::EXPR_PREF . $this->key]) ){
+        if( false===( $cobj=self::$memcache->get($this->key) ) ) {
             return false;
         }
         
-        $cobj   = $c_arr[$this->key];
-        $expire = $c_arr[self::EXPR_PREF . $this->key];
+        //$cobj   = $c_arr[$this->key];
+        //$expire = $c_arr[self::EXPR_PREF . $this->key];
         
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
-        if( false===$expire || $expire < time() ){
+        if( false===( $expire=self::$memcache->get(self::EXPR_PREF . $this->key) ) || $expire < time() ){
             # Пытаемся установить блокировку
             # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
             if($this->lock->set($this->key)) {

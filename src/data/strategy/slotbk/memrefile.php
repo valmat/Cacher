@@ -37,7 +37,7 @@
  * 
  */
 
-class Cacher_Backend_MemReFile extends Cacher_Backend{
+class Cacher_Backend_MemReFile extends Cacher_Backend {
     
     private static $memcache=null;
     
@@ -108,47 +108,47 @@ class Cacher_Backend_MemReFile extends Cacher_Backend{
         # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
         //if( false===( $c_arr = self::$memcache->get( Array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) || !isset($c_arr[self::EXPR_PREF . $this->key]) ){
         if( false===( $cobj=self::$memcache->get($this->key) ) ){
-           # Пытаемся установить блокировку
-           # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-           if($this->set_lock())
-             return false;
-           # Пытаемся получить Кеш из файла
-           $this->getPath();
-           if( file_exists( $this->fullpath ) )
-              return unserialize(file_get_contents( $this->fullpath ));
-           # Если файл кеша так же отсутствует, безусловно перекешируем
-           return false;
+            # Пытаемся установить блокировку
+            # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
+            if($this->set_lock())
+                return false;
+            # Пытаемся получить Кеш из файла
+            $this->getPath();
+            if( file_exists( $this->fullpath ) )
+                return unserialize(file_get_contents( $this->fullpath ));
+            # Если файл кеша так же отсутствует, безусловно перекешируем
+            return false;
         }
         
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
         if( false===( $expire=self::$memcache->get(self::EXPR_PREF . $this->key) ) || $expire < time() ){
-          # Пытаемся установить блокировку
-          # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-          if($this->set_lock())
-            return false;
-          return $cobj['data'];
+            # Пытаемся установить блокировку
+            # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
+            if($this->set_lock())
+                return false;
+            return $cobj['data'];
         }
         $tags = $cobj['tags'];
         $tags_cnt = count($tags);
         
         # Если тегов нет, то просто отдаем объект. Тогда дальше можно считать 0!=$tags_cnt
         if(0==$tags_cnt)
-          return $cobj['data'];
+            return $cobj['data'];
         
         $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
-          if($this->set_lock())
-            return false;
-          return $cobj['data'];        
+            if($this->set_lock())
+                return false;
+            return $cobj['data'];
         }
         
         # Если кеш протух по тегам, то сообщаем об этом
         foreach($tags as $tag_k => $tag_v){
             if($tags_mc[$tag_k]>$tag_v){
-              if($this->set_lock())
-                 return false;
-              return $cobj['data'];        
+                if($this->set_lock())
+                    return false;
+                return $cobj['data'];
             }
         }
         

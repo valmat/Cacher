@@ -36,7 +36,7 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
     /**
       * Префикс для формирования ключа блокировки
       */
-    const LOCK_PREF = CONFIG_Cacher_BK_MemReCache0::LOCK_PREF;
+    //const LOCK_PREF = CONFIG_Cacher_BK_MemReCache0::LOCK_PREF;
     
     /**
       * Время жизни ключа блокировки. Если во время перестроения кеша процесс аварийно завершится,
@@ -44,7 +44,7 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
       * С другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состояние гонки и блокировочный механизм перестанет работать.
       * Т.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
       */
-    const LOCK_TIME = CONFIG_Cacher_BK_MemReCache0::LOCK_TIME;
+    //const LOCK_TIME = CONFIG_Cacher_BK_MemReCache0::LOCK_TIME;
     
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)

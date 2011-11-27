@@ -18,8 +18,12 @@
     */
         
    function Cacher_Slot_Test() {
-      //return Cacher::setOption(CacheTypes::FAST , 10, 'user_' . $UserID);
       return array(CacheTypes::FAST , 10);
+   }
+      
+      
+   function Cacher_Slot_Test1() {
+      return array(CacheTypes::SIMPLEST , 10);
    }
       
 

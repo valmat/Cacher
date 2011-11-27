@@ -88,7 +88,7 @@ final class Cacher {
       
       require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
       $BackendName = 'Cacher_Backend_'.$BackendName;
-      $SelfObj->Backend = new $BackendName($CacheKey, self::NAME_SPACE);
+      $SelfObj->Backend = new $BackendName($CacheKey);
       return $SelfObj;
     }
       

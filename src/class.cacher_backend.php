@@ -8,14 +8,15 @@
 abstract class Cacher_Backend {
     
     protected $key;
+    protected $multimode = false;
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
      * function get
      */
     public function get() {
-        echo (is_array($this->key))?'multiGet()':'singleGet()';
-        return (is_array($this->key))?$this->multiGet():$this->singleGet();
+        echo ($this->multimode)?'multiGet()':'singleGet()';
+        return ($this->multimode)?$this->multiGet():$this->singleGet();
     }
     
     /*
@@ -61,6 +62,7 @@ abstract class Cacher_Backend {
      */
     function __construct($CacheKey) {
         $this->key  = $CacheKey;
+        $this->multimode = is_array($CacheKey);
     }
  }
 
