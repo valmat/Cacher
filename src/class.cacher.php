@@ -56,21 +56,11 @@ final class Cacher {
      * @var array of Cacher_Tag
      */
     private    $Tags = Array();
-    
-    
-    
-    /**
-     * array of self objects in multiget mode
-     * @var array self
-     */
-    private    $multi;
-    
     /**
      * array of self objects in multiget mode
      * @var array self
      */
     private    $val = NULL;
-    
     
     /*
      * private constructor
@@ -91,21 +81,26 @@ final class Cacher {
 	    require self::PATH_SLOTS;
 	
 	list($BackendName, $LifeTime) = call_user_func('Cacher_Slot_'.$SlotName);
-	if(!class_exists('Cacher_Backend_'.$BackendName) ){
-	    require self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
-	}
+	
+	require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
 	$BackendName = 'Cacher_Backend_'.$BackendName;
-      
+	
 	if(is_array($arg)) {
-	    //$CacheKey = array();
-	    $slots = array();
+	    $CacheKeys = array();
 	    foreach($arg as $key) {
-		$CacheKey = self::NAME_SPACE . $SlotName . ':' . $key;
+		$CacheKeys[$key] = self::NAME_SPACE . $SlotName . ':' . $key;
+	    }
+	    
+	    $slots = array();
+	    foreach($BackendName::multiGet($CacheKeys) as $key => $val) {
 		$slot = new Cacher();
-		$slot->val = false;
-		
-		$slot->LifeTime = $LifeTime;
-		$slot->Backend = new $BackendName($CacheKey);
+		if( false === $val || NULL === $val ) {
+		    $CacheKey = $CacheKeys[$key];
+		    $slot->LifeTime = $LifeTime;
+		    $slot->Backend = new $BackendName($CacheKey);
+    		} else {
+		    $slot->val = $val;
+		}
 		$slots[$key] = $slot;
 	    }
 	    return $slots;
@@ -143,12 +138,6 @@ final class Cacher {
     public function get() {
         return (NULL == $this->val) ? $this->Backend->get() : $this->val;
     }
-    
-    public function toFill() {
-        return $this->Backend->toFill();
-    }
-    
-    
     
     /*
      * function set

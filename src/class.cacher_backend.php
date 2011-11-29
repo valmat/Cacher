@@ -8,50 +8,20 @@
 abstract class Cacher_Backend {
     
     protected $key;
-    protected $multimode = false;
-    protected $multirez;
-    protected $val;
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
+     * Используется, когда Cacher инициализирован строковым ключем
      * function get
      */
-    public function get() {
-        echo ($this->multimode)?'multiGet()':'singleGet()';
-        
-        //$this->multimode && ($this->multirez = array_map('self::set_false', array_flip($this->key)));
-        if($this->multimode) {
-            $this->multirez = array_fill_keys($this->key, false);
-            
-            //$this->key = array_combine($this->key, $this->key);
-        }
-        return ($this->multimode)?$this->multiGet():$this->singleGet();
-    }
-    
-    /*
-     * Получить значение кеша если есть, или false, если отсутствует.
-     * Используется, когда передается строковой ключ
-     * function singleGet
-     */
-    abstract protected function singleGet();
+    abstract public function get();
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
      * Используется, когда передается массив ключей
      * function multiGet
      */
-    abstract protected function multiGet();
-    
-    
-    public function toFill() {
-        if(!$this->multimode) {
-            return false;
-        }
-        $ret = array_keys(array_filter($this->multirez, function($v) {
-            return false===$v;
-        }));
-        return count($ret)?$ret:false;
-    }
+    abstract static function multiGet($keys);
     
     /*
      * function set
@@ -74,7 +44,7 @@ abstract class Cacher_Backend {
      * @param void
      * @return string Cache tag type throw CacheTagTypes namespace
      */
-    abstract function tagsType(); /*{return CacheTagTypes::FAST;}*/
+    abstract function tagsType();
     
     /*
      * __construct()
@@ -82,7 +52,6 @@ abstract class Cacher_Backend {
      */
     function __construct($CacheKey) {
         $this->key  = $CacheKey;
-        $this->multimode = is_array($CacheKey);
     }
     
  }

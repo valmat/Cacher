@@ -35,7 +35,7 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
      * function set_lock
      * @param $arg void
      */
-    public function set($key) {
+    static function set($key) {
         !self::$memcache && ( self::$memcache = Mcache::init() );
         self::$locked[$key] = isset(self::$locked[$key]) && self::$locked[$key];
         if( !(self::$locked[$key]) && !(self::$memcache->get(self::LOCK_PREF . $key)) )
@@ -49,7 +49,7 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
      * function set_lock
      * @param $arg void
      */
-    public function del($key) {
+    static function del($key) {
         !self::$memcache && ( self::$memcache = Mcache::init() );
         if(isset(self::$locked[$key]) && self::$locked[$key] && self::$memcache->delete(self::LOCK_PREF . $key, 0)) {
             unset(self::$locked[$key]);

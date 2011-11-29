@@ -88,7 +88,7 @@ class Cacher_Backend_MemReCache extends Cacher_Backend  {
     //    return $this->is_locked;
     //}
     
-    protected function singleGet() {
+    public function get() {
         # Если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===( $c_arr = self::$memcache->get( array( $this->key, self::EXPR_PREF . $this->key ) )) ){
             return false;
@@ -101,6 +101,7 @@ class Cacher_Backend_MemReCache extends Cacher_Backend  {
      * function get
      */
     static function multiGet($keys){
+        !self::$memcache && (self::$memcache = Mcache::init());
         $expir_keys  = array_map ( 'self::expirKey' , $keys );
         # Если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===( $c_arr = self::$memcache->get( array_merge ( $expir_keys, $keys ) )) ){

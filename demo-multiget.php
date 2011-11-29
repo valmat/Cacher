@@ -68,11 +68,13 @@ function print_time($cmnt = ''){
     }
     
     
-    
-    $User1 = new User(156);
-    $User2 = new User(468);
-    $User3 = new User(1295);
-    $users= array($User1->id=>$User1,$User2->id=>$User2,$User3->id=>$User3);
+    $usercount = 50;
+    $users= array();
+    for($i=0; $i<$usercount; $i++) {
+        //$id = mt_rand(1,1000);
+        $id = $usercount-$i;
+        $users[$id] = new User($id);
+    }
     
     function GetFromAnyExternal($arr, $users){
         
@@ -84,35 +86,18 @@ function print_time($cmnt = ''){
     }
     
     
-    echo "<hr><pre>";
-    var_export(Cacher_Tag::create('SmplTag', 51)->getKey());
-    echo '</pre><hr>';
+    $toFill = array();
+    $keys = array_keys($users);
+    $slots = Cacher::create('Test', $keys);
+    $CacheData = array();
     
-    //Cacher::Slot('User',$User);
-    
-    $keys = array($User1->id,$User2->id,$User3->id);
-    
-    
-    $slot = Cacher::create('Test', $keys);
-    
-    echo "<hr><pre>";
-    var_export($slot);
-    echo '</pre><hr>';
-    exit;
-    
-    
-    $CacheData = $slot->get();
-    
-    if($toFill = $slot->toFill()) {
-        $getedData = GetFromAnyExternal($toFill,$users);        // Получаем данные из внешнего хранилища
-        
-        echo "<hr><pre>";var_export($getedData);echo '</pre><hr>';
+    foreach($slots as $key => $slot) {
+        if( !($CacheData[$key] = $slot->get()) ) {
+            $toFill[] = $key;
+        }
     }
-    
-    foreach($getedData as $key => $val) {
-            
-        $CacheData[$key] = $val;
-        
+    $rez = GetFromAnyExternal($toFill, $users);
+    foreach($toFill as $key) {
         //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
         //$slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
         
@@ -120,9 +105,10 @@ function print_time($cmnt = ''){
         
         //sleep(1);// hard data
         
+        $val =$rez[$key];
         echo '<hr><font color=blue>to cache</font><hr>';
-          
-        $slot->set($val);
+        $slots[$key]->set($val);
+        $CacheData[$key] = $val;
     }
     
     
