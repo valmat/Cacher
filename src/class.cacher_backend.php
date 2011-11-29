@@ -10,6 +10,7 @@ abstract class Cacher_Backend {
     protected $key;
     protected $multimode = false;
     protected $multirez;
+    protected $val;
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.

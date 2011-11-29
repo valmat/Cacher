@@ -13,7 +13,7 @@ interface Cacher_Lock {
      * function set_lock
      * @param $arg void
      */
-    public function set($key);
+    static function set($key);
     
     /*
      * проверяем не установил ли кто либо блокировку
@@ -21,7 +21,7 @@ interface Cacher_Lock {
      * function set_lock
      * @param $arg void
      */
-    public function del($key);
+    static function del($key);
     
 }
 

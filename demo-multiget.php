@@ -94,6 +94,13 @@ function print_time($cmnt = ''){
     
     
     $slot = Cacher::create('Test', $keys);
+    
+    echo "<hr><pre>";
+    var_export($slot);
+    echo '</pre><hr>';
+    exit;
+    
+    
     $CacheData = $slot->get();
     
     if($toFill = $slot->toFill()) {

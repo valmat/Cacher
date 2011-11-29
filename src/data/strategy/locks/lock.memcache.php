@@ -25,13 +25,9 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
       * Флаг установленной блокировки
       * После установки этот флаг помечается в true
       * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
-      * Затем флаг блокировки должен быть снят: $this->is_locked = false;
+      * Затем флаг блокировки должен быть снят: self::$locked[$key] = false;
       */
-    private  $is_locked = false;
-    
-    function __construct() {
-        self::$memcache = Mcache::init();
-    }
+    private static $locked = array();
     
     /*
      * проверяем не установил ли кто либо блокировку
@@ -40,9 +36,11 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
      * @param $arg void
      */
     public function set($key) {
-        if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $key)) )
-           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $key,true,false,self::LOCK_TIME);
-        return $this->is_locked;
+        !self::$memcache && ( self::$memcache = Mcache::init() );
+        self::$locked[$key] = isset(self::$locked[$key]) && self::$locked[$key];
+        if( !(self::$locked[$key]) && !(self::$memcache->get(self::LOCK_PREF . $key)) )
+            self::$locked[$key] = self::$memcache->add(self::LOCK_PREF . $key,true,false,self::LOCK_TIME);
+        return self::$locked[$key];
     }
     
     /*
@@ -52,11 +50,12 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
      * @param $arg void
      */
     public function del($key) {
-        if($this->is_locked){
-            $this->is_locked = false;
-            self::$memcache->delete(self::LOCK_PREF . $key, 0);
+        !self::$memcache && ( self::$memcache = Mcache::init() );
+        if(isset(self::$locked[$key]) && self::$locked[$key] && self::$memcache->delete(self::LOCK_PREF . $key, 0)) {
+            unset(self::$locked[$key]);
+            return true;
         }
-        return $this->is_locked;
+        return false;
     }
     
 }

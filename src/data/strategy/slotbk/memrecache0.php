@@ -72,44 +72,44 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
      */
     private function set_lock() {
         if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $this->key)) )
-           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key, true, false, self::LOCK_TIME);
+            $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key, true, false, self::LOCK_TIME);
         return $this->is_locked;
     }
     
     protected function singleGet() {
         # если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===($cobj = self::$memcache->get($this->key)) )
-           return false;
-
+            return false;
+        
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
         if($cobj['expire'] < time()){
-          # Пытаемся установить блокировку
-          # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-          if($this->set_lock())
-            return false;
-          return $cobj['data'];
+            # Пытаемся установить блокировку
+            # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
+            if($this->set_lock())
+                return false;
+            return $cobj['data'];
         }
         $tags = $cobj['tags'];
         $tags_cnt = count($tags);
         
         # Если тегов нет, то просто отдаем объект. Тогда дальше можно считать 0!=$tags_cnt
         if(0==$tags_cnt)
-          return $cobj['data'];
+            return $cobj['data'];
         
         $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
-          if($this->set_lock())
-            return false;
-          return $cobj['data'];        
+            if($this->set_lock())
+                return false;
+            return $cobj['data'];        
         }
         
         # Если кеш протух по тегам, то сообщаем об этом
         foreach($tags as $tag_k => $tag_v){
             if($tags_mc[$tag_k]>$tag_v){
-              if($this->set_lock())
-                 return false;
-              return $cobj['data'];        
+                if($this->set_lock())
+                    return false;
+                return $cobj['data'];        
             }
         }
         
@@ -141,11 +141,10 @@ class Cacher_Backend_MemReCache0 extends Cacher_Backend{
         if( $tags_cnt>0 && count($tags_mc)!= $tags_cnt)
           {
             for($i=0;$i<$tags_cnt;$i++)
-               if(!isset($tags_mc[$tags[$i]]))
-                  {
+                if(!isset($tags_mc[$tags[$i]])) {
                     $tags_mc[$tags[$i]] = $thetime;
                     self::$memcache->set( $tags[$i], $thetime, false, 0 );
-                  }
+                }
           }
         $cobj = Array(
                       'expire' => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime),

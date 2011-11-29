@@ -57,8 +57,24 @@ final class Cacher {
      */
     private    $Tags = Array();
     
+    
+    
+    /**
+     * array of self objects in multiget mode
+     * @var array self
+     */
+    private    $multi;
+    
+    /**
+     * array of self objects in multiget mode
+     * @var array self
+     */
+    private    $val = NULL;
+    
+    
     /*
      * private constructor
+     * For create object, use self::create
      */
     private function __construct() {}
     
@@ -71,34 +87,35 @@ final class Cacher {
      * @param $arg
      */
     static function create($SlotName, $arg='') {
-      if (!defined('CACHER_SLOT_REQUIRED'))
-        require self::PATH_SLOTS;
-        
+	if (!defined('CACHER_SLOT_REQUIRED'))
+	    require self::PATH_SLOTS;
+	
+	list($BackendName, $LifeTime) = call_user_func('Cacher_Slot_'.$SlotName);
+	if(!class_exists('Cacher_Backend_'.$BackendName) ){
+	    require self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
+	}
+	$BackendName = 'Cacher_Backend_'.$BackendName;
       
-      $SelfObj = new Cacher();
-      list($BackendName, $SelfObj->LifeTime) = call_user_func('Cacher_Slot_'.$SlotName);
-      if(is_array($arg)) {
-        $CacheKey = array();
-        
-        /*
-        $nmsp = self::NAME_SPACE;
-        $CacheKey = array_combine($arg, $arg);
-        $CacheKey = array_map(function($key) use($nmsp, $SlotName){
-            return $nmsp . $SlotName . ':' . $key;
-          },$CacheKey);
-        */
-        foreach($arg as $key) {
-          $CacheKey[$key] = self::NAME_SPACE . $SlotName . ':' . $key;
-        }
-        
-      } else {
-        $CacheKey = self::NAME_SPACE . $SlotName . ':' . $arg;
-      }
-      
-      require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
-      $BackendName = 'Cacher_Backend_'.$BackendName;
-      $SelfObj->Backend = new $BackendName($CacheKey);
-      return $SelfObj;
+	if(is_array($arg)) {
+	    //$CacheKey = array();
+	    $slots = array();
+	    foreach($arg as $key) {
+		$CacheKey = self::NAME_SPACE . $SlotName . ':' . $key;
+		$slot = new Cacher();
+		$slot->val = false;
+		
+		$slot->LifeTime = $LifeTime;
+		$slot->Backend = new $BackendName($CacheKey);
+		$slots[$key] = $slot;
+	    }
+	    return $slots;
+	} else {
+	    $CacheKey = self::NAME_SPACE . $SlotName . ':' . $arg;
+	    $slot = new Cacher();
+	    $slot->LifeTime = $LifeTime;
+	    $slot->Backend = new $BackendName($CacheKey);
+	    return $slot;
+	}
     }
       
     /**
@@ -109,7 +126,7 @@ final class Cacher {
      */
     public function addTag(Cacher_Tag $tag) {
         if ($tag->getBkName() == $this->Backend->tagsType()) {
-            $this->Tags[] = $tag->getKey();
+	    $this->Tags[] = $tag->getKey();
             return true;
         }
         trigger_error('Backends for tag ' . get_class($tag) . ' and slot ' . get_class($this) . ' must be same', E_USER_WARNING);
@@ -124,7 +141,7 @@ final class Cacher {
      * @return mixed   Complex data or false if no cache entry is found.
      */
     public function get() {
-        return $this->Backend->get();
+        return (NULL == $this->val) ? $this->Backend->get() : $this->val;
     }
     
     public function toFill() {
@@ -141,7 +158,8 @@ final class Cacher {
      * @return bool - успешность операции
      */
     public function set($val) {
-        return $this->Backend->set($val, $this->Tags, $this->LifeTime);
+	$this->val = $val;
+	return $this->Backend->set($val, $this->Tags, $this->LifeTime);
     }
 
     /*
@@ -152,7 +170,8 @@ final class Cacher {
      * @return void
      */
     public function del() {
-        $this->Backend->del();
+	$this->val = NULL;
+	$this->Backend->del();
     }
   
 }
