@@ -79,9 +79,18 @@ final class Cacher {
       list($BackendName, $SelfObj->LifeTime) = call_user_func('Cacher_Slot_'.$SlotName);
       if(is_array($arg)) {
         $CacheKey = array();
+        
+        /*
+        $nmsp = self::NAME_SPACE;
+        $CacheKey = array_combine($arg, $arg);
+        $CacheKey = array_map(function($key) use($nmsp, $SlotName){
+            return $nmsp . $SlotName . ':' . $key;
+          },$CacheKey);
+        */
         foreach($arg as $key) {
-          $CacheKey[] = self::NAME_SPACE . $SlotName . ':' . $key;
+          $CacheKey[$key] = self::NAME_SPACE . $SlotName . ':' . $key;
         }
+        
       } else {
         $CacheKey = self::NAME_SPACE . $SlotName . ':' . $arg;
       }
@@ -117,6 +126,12 @@ final class Cacher {
     public function get() {
         return $this->Backend->get();
     }
+    
+    public function toFill() {
+        return $this->Backend->toFill();
+    }
+    
+    
     
     /*
      * function set

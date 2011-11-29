@@ -68,9 +68,19 @@ function print_time($cmnt = ''){
     }
     
     
-
-    function GetFromAnyExternal(User $User){
-        return Array('username','userid'=>$User->id, date('h:i:s A') );
+    
+    $User1 = new User(156);
+    $User2 = new User(468);
+    $User3 = new User(1295);
+    $users= array($User1->id=>$User1,$User2->id=>$User2,$User3->id=>$User3);
+    
+    function GetFromAnyExternal($arr, $users){
+        
+        $r = array();
+        foreach($arr as $key) {
+           $r[$key] =  array('_id'=>$users[$key]->id, date('h:i:s A') );
+        }
+        return $r;
     }
     
     
@@ -78,28 +88,37 @@ function print_time($cmnt = ''){
     var_export(Cacher_Tag::create('SmplTag', 51)->getKey());
     echo '</pre><hr>';
     
-    $User1 = new User(1);
-    $User2 = new User(2);
-    $User3 = new User(3);
     //Cacher::Slot('User',$User);
+    
     $keys = array($User1->id,$User2->id,$User3->id);
+    
+    
     $slot = Cacher::create('Test', $keys);
     $CacheData = $slot->get();
-    foreach($CacheData as $key => $rez) {
-        if (false === $rez) {
-             $CacheData = GetFromAnyExternal($User);        // Получаем данные из внешнего хранилища
-             //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-             //$slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
-             
-             //Cacher_Tag::create('SmplTag', $User)->getKey();
-             
-             //sleep(1);// hard data
-             
-             echo '<hr><font color=blue>to cache</font><hr>';
-               
-             $slot->set($rez, $key);
-        }
+    
+    if($toFill = $slot->toFill()) {
+        $getedData = GetFromAnyExternal($toFill,$users);        // Получаем данные из внешнего хранилища
+        
+        echo "<hr><pre>";var_export($getedData);echo '</pre><hr>';
     }
+    
+    foreach($getedData as $key => $val) {
+            
+        $CacheData[$key] = $val;
+        
+        //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+        //$slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
+        
+        //Cacher_Tag::create('SmplTag', $User)->getKey();
+        
+        //sleep(1);// hard data
+        
+        echo '<hr><font color=blue>to cache</font><hr>';
+          
+        $slot->set($val);
+    }
+    
+    
     
     //$slot->del();
     

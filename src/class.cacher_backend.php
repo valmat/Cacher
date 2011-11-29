@@ -9,6 +9,7 @@ abstract class Cacher_Backend {
     
     protected $key;
     protected $multimode = false;
+    protected $multirez;
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
@@ -16,6 +17,13 @@ abstract class Cacher_Backend {
      */
     public function get() {
         echo ($this->multimode)?'multiGet()':'singleGet()';
+        
+        //$this->multimode && ($this->multirez = array_map('self::set_false', array_flip($this->key)));
+        if($this->multimode) {
+            $this->multirez = array_fill_keys($this->key, false);
+            
+            //$this->key = array_combine($this->key, $this->key);
+        }
         return ($this->multimode)?$this->multiGet():$this->singleGet();
     }
     
@@ -32,6 +40,17 @@ abstract class Cacher_Backend {
      * function multiGet
      */
     abstract protected function multiGet();
+    
+    
+    public function toFill() {
+        if(!$this->multimode) {
+            return false;
+        }
+        $ret = array_keys(array_filter($this->multirez, function($v) {
+            return false===$v;
+        }));
+        return count($ret)?$ret:false;
+    }
     
     /*
      * function set
@@ -64,6 +83,7 @@ abstract class Cacher_Backend {
         $this->key  = $CacheKey;
         $this->multimode = is_array($CacheKey);
     }
+    
  }
 
 
