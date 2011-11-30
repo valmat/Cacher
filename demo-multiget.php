@@ -106,7 +106,7 @@ function print_time($cmnt = ''){
         //echo "<hr>setTag: ", Cacher_Tag::create('SmplTag', $key)->getKey();
         
         
-        $slots[$key]->addTag( Cacher_Tag::create('SmplTag', $key) );
+        //$slots[$key]->addTag( Cacher_Tag::create('SmplTag', $key) );
         
         
         //sleep(1);// hard data
@@ -120,9 +120,8 @@ function print_time($cmnt = ''){
     //Cacher_Tag::create('SmplTag', 50)->clear();
     
     //$slots[10]->del();
-    echo "<hr><pre>";
-    var_export($slots);
-    echo '</pre><hr>';
+    
+    echo "<hr><pre>";var_export($slots);echo '</pre><hr>';
 
     
     
@@ -133,9 +132,8 @@ function print_time($cmnt = ''){
     //Cacher::newTag('SmplTag1',$User)->clear();
     
     //Cacher::newTag('AniTagData2',AniTagDataObj1)->clear()        // Очищаем кеш тега
-echo '<hr>Cached data:<pre>';
-var_export($CacheData);
-echo '</pre><hr>';
+
+//echo '<hr>Cached data:<pre>';var_export($CacheData);echo '</pre><hr>';
 
 
 ################################################################################

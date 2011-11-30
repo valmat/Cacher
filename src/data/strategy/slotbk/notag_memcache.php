@@ -20,7 +20,7 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      * Получение кеша
      * function get
      */
-    protected function singleGet(){
+    public function get(){
         # если объекта в кеше не нашлось
         if( false===($cobj = self::$memcache->get($this->key)) )
            return false;
@@ -32,12 +32,20 @@ class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
      * Получение кеша для мультиключа
      * function get
      */
-    protected function multiGet(){
-        #
-        echo "<hr>{{{<pre>";
-        var_export($this->key);
-        echo '</pre>}}}<hr>';
-        return array();
+    static function multiGet($keys){
+        !self::$memcache && (self::$memcache = Mcache::init());
+        # Если объекта в кеше не нашлось, то безусловно перекешируем
+        if( false===( $Cobjs = self::$memcache->get( $keys )) ){
+            return false;
+        }
+        
+        $rekeys = array_flip($keys);
+        $rez = array_fill_keys($rekeys, false);
+        foreach($Cobjs as $rekey => $cobj) {
+            $rez[$rekeys[$rekey]] = $cobj;
+        }
+        
+        return $rez;
     }
     
     /*
