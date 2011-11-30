@@ -147,4 +147,3 @@ class Cacher_Backend_Memcache  extends Cacher_Backend{
     }    
 }
 
-?>

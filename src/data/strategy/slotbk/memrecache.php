@@ -216,4 +216,3 @@ class Cacher_Backend_MemReCache extends Cacher_Backend  {
     
 }
 
-?>

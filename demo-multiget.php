@@ -117,7 +117,7 @@ function print_time($cmnt = ''){
         $CacheData[$key] = $val;
     }
     
-    Cacher_Tag::create('SmplTag', 50)->clear();
+    //Cacher_Tag::create('SmplTag', 50)->clear();
     
     //$slots[10]->del();
     echo "<hr><pre>";

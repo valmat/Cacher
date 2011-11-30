@@ -30,10 +30,11 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
     private static $locked = array();
     
     /*
+     * function set
      * проверяем не установил ли кто либо блокировку
      * Если блокировка не установлена, пытаемся создать ее методом add, что бы предотвратить состояние гонки
-     * function set_lock
-     * @param $arg void
+     * @param $key string
+     * @return bool
      */
     static function set($key) {
         !self::$memcache && ( self::$memcache = Mcache::init() );
@@ -44,10 +45,10 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
     }
     
     /*
-     * проверяем не установил ли кто либо блокировку
-     * Если блокировка не установлена, пытаемся создать ее методом add, что бы предотвратить состояние гонки
-     * function set_lock
-     * @param $arg void
+     * function del
+     * Удаление блокировки
+     * @param $key string
+     * @return bool
      */
     static function del($key) {
         !self::$memcache && ( self::$memcache = Mcache::init() );
@@ -58,6 +59,14 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
         return false;
     }
     
+    /*
+     * function get
+     * Проверка установленности блокировки
+     * @param $key string
+     * @return bool
+     */
+    static function get($key) {
+        return isset(self::$locked[$key]) && self::$locked[$key];
+    }
+    
 }
-
-?>
