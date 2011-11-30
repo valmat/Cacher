@@ -7,6 +7,7 @@
  * В этом бекенде теги не поддерживаются. По суи простая обертка для memcache
  * 
  */
+
 class Cacher_Backend_notag_Memcache  implements Cacher_Backend{
     
     private static $memcache=null;

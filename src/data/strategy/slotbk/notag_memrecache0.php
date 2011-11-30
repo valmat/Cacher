@@ -51,7 +51,8 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
         self::$memcache = Mcache::init();
     }
     
-    public function get(){
+    public function get() {
+        self::$asdf = 55;
         # если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===($cobj = self::$memcache->get($this->key)) || !isset($cobj[0]) || !isset($cobj[1]) )
             return false;
@@ -102,8 +103,12 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
      * @param $CacheVal string, $tags array, $LifeTime int
      */
     function set($CacheVal, $tags, $LifeTime){
-        $thetime = time();
         $lock = self::LOCK_NAME;
+        if(!$lock::get($this->key)) {
+            return $CacheVal;
+        }
+        
+        $thetime = time();
         $cobj = Array(
                       0 => $CacheVal,
                       1 => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime)
@@ -112,7 +117,6 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
         
         # Сбрасываем блокировку
         $lock::del($this->key);
-        
         return $CacheVal;
     }
     

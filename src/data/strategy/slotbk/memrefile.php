@@ -183,8 +183,13 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
      * @param $CacheVal string,  string, $tags array, $LifeTime int
      */
     function set($CacheVal, $tags, $LifeTime){
-        $thetime = time();
         $lock = self::LOCK_NAME;
+        # Если блокировку установил текущий процесс, то устанавливаем кеш.
+        if(!$lock::get($this->key)) {
+            return $CacheVal;
+        }
+        
+        $thetime = time();
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
         
@@ -204,29 +209,25 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
         $cobj = Array(
                       'data' => $CacheVal,
                       'tags' => $tags_mc
-                     );
+                    );
         
         self::$memcache->set(self::EXPR_PREF . $this->key, $expire, false, 0);
         self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
         
         # Пишем кеш в файл
-        # Если блокировку установил текущий процесс, то пишем в файл
-        if($lock::get($this->key)){
-            $this->getPath();
-            $thedir = self::CACHE_PATH;
-            for($i=0; $i<=self::CF_DEPTH; $i++){
-                if(!is_dir($thedir .= '/' . $this->patharr[$i]))
-                   mkdir($thedir, 0700);
-            }
-            $tmp_file = tempnam($thedir, 'fctmp_');
-            file_put_contents($tmp_file, serialize($CacheVal) );
-            # Атомарно перемещаем файл с данными кеша в файловый кеш
-            rename($tmp_file, $this->fullpath);
-        }        
+        $this->getPath();
+        $thedir = self::CACHE_PATH;
+        for($i=0; $i<=self::CF_DEPTH; $i++){
+            if(!is_dir($thedir .= '/' . $this->patharr[$i]))
+                mkdir($thedir, 0700);
+        }
+        $tmp_file = tempnam($thedir, 'fctmp_');
+        file_put_contents($tmp_file, serialize($CacheVal) );
+        # Атомарно перемещаем файл с данными кеша в файловый кеш
+        rename($tmp_file, $this->fullpath);
         
         # Снимаем блокировку
         $lock::del($this->key);
-        
         return $CacheVal;
     }
     

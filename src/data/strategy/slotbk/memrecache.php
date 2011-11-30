@@ -140,6 +140,11 @@ class Cacher_Backend_MemReCache implements Cacher_Backend  {
      * @param $CacheVal string, $tags array, $LifeTime int
      */
     function set($CacheVal, $tags, $LifeTime){
+        $lock = self::LOCK_NAME;
+        if(!$lock::get($this->key)) {
+            return $CacheVal;
+        }
+        
         $thetime = time();
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
@@ -163,9 +168,7 @@ class Cacher_Backend_MemReCache implements Cacher_Backend  {
         self::$memcache->set(self::EXPR_PREF.$this->key, $expire, false, 0);
         self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
         
-        $lock = self::LOCK_NAME;
         $lock::del($this->key);
-        
         return $CacheVal;
     }
     
