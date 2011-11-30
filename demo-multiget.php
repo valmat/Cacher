@@ -112,7 +112,7 @@ function print_time($cmnt = ''){
         //sleep(1);// hard data
         
         $val =$rez[$key];
-        echo '<br><font color=blue>to cache</font><br>';
+        echo "<br><font color=blue>to cache($key)</font><br>";
         $slots[$key]->set($val);
         $CacheData[$key] = $val;
     }

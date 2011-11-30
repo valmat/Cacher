@@ -74,7 +74,7 @@ class Cacher_Backend_Memcache  extends Cacher_Backend{
     /*
      * function mainGet
      * @param $key string
-     * @param $c_arr array
+     * @param $cobj array
      */
     private static function mainGet($key, &$cobj) {
         $tags = $cobj['tags'];

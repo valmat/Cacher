@@ -57,36 +57,15 @@ class Cacher_Backend_MemReCache extends Cacher_Backend  {
     const EXPR_PREF = CONFIG_Cacher_BK_MemReCache::EXPR_PREF;
     
     /**
-      * EXPIRE PREFIX - префикс для хранения ключа со временем истечения кеша
+      * Имя используемого класса блокировки
       */
     const LOCK_NAME = 'Cacher_Lock_Memcache';
     
-    
-    
-    /**
-      * Флаг установленной блокировки
-      * После установки этот флаг помечается в true
-      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
-      * Затем флаг блокировки должен быть снят: $this->is_locked = false;
-      */
-    //private   $is_locked = false;
     
     function __construct($CacheKey) {
         parent::__construct($CacheKey);
         self::$memcache = Mcache::init();
     }
-    
-    /*
-     * проверяем не установил ли кто либо блокировку
-     * Если блокировка не установлена, пытаемся создать ее методом add, что бы предотвратить состояние гонки
-     * function set_lock
-     * @param $arg void
-     */
-    //private function set_lock() {
-    //    if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $this->key)) )
-    //       $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key,true,false,self::LOCK_TIME);
-    //    return $this->is_locked;
-    //}
     
     public function get() {
         # Если объекта в кеше не нашлось, то безусловно перекешируем
