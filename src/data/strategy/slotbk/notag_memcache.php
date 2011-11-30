@@ -7,12 +7,13 @@
  * В этом бекенде теги не поддерживаются. По суи простая обертка для memcache
  * 
  */
-class Cacher_Backend_notag_Memcache  extends Cacher_Backend{
+class Cacher_Backend_notag_Memcache  implements Cacher_Backend{
     
     private static $memcache=null;
+    private $key;
        
     function __construct($CacheKey) {
-        parent::__construct($CacheKey);
+        $this->key  = $CacheKey;
         self::$memcache = Mcache::init();
     }
 

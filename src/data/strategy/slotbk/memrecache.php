@@ -32,24 +32,8 @@
 
 require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memcache.php';
 
-class Cacher_Backend_MemReCache extends Cacher_Backend  {
+class Cacher_Backend_MemReCache implements Cacher_Backend  {
     
-    private static $memcache=null;
-    
-    /**
-      * Префикс для формирования ключа блокировки
-      */
-    //const LOCK_PREF = CONFIG_Cacher_BK_MemReCache::LOCK_PREF;
-    /**
-      * Время жизни ключа блокировки. Если во время перестроения кеша процесс аварийно завершится,
-      * то блокировка останется включенной и другие процессы будут продолжать выдавать протухший кеш LOCK_TIME секунд.
-      * С другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состояние гонки и блокировочный механизм перестанет работать.
-      * Т.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
-      */
-    //const LOCK_TIME = CONFIG_Cacher_BK_MemReCache::LOCK_TIME;
-    /**
-      * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
-      */
     const MAX_LTIME = CONFIG_Cacher_BK_MemReCache::MAX_LTIME;
     /**
       * EXPIRE PREFIX - префикс для хранения ключа со временем истечения кеша
@@ -61,9 +45,11 @@ class Cacher_Backend_MemReCache extends Cacher_Backend  {
       */
     const LOCK_NAME = 'Cacher_Lock_Memcache';
     
+    private static $memcache=null;
+    private $key;
     
     function __construct($CacheKey) {
-        parent::__construct($CacheKey);
+        $this->key  = $CacheKey;
         self::$memcache = Mcache::init();
     }
     

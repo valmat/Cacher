@@ -39,10 +39,7 @@
 
 require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memcache.php';
 
-class Cacher_Backend_MemReFile extends Cacher_Backend {
-    
-    private static $memcache=null;
-    
+class Cacher_Backend_MemReFile implements Cacher_Backend {
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
@@ -69,6 +66,9 @@ class Cacher_Backend_MemReFile extends Cacher_Backend {
       */
     const LOCK_NAME = 'Cacher_Lock_Memcache';
     
+    private static $memcache=null;
+    private $key;
+    
     /**
       * Полный путь (относительно self::CACHE_PATH) к файловому кешу для данного ключа
       */
@@ -80,7 +80,7 @@ class Cacher_Backend_MemReFile extends Cacher_Backend {
     private $patharr = Array();
     
     function __construct($CacheKey) {
-        parent::__construct($CacheKey);
+        $this->key  = $CacheKey;
         self::$memcache = Mcache::init();
     }
     
