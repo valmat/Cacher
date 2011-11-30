@@ -19,7 +19,7 @@
         
    function Cacher_Slot_Test() {
       //return array(CacheTypes::FAST , 10);
-      return array('notag_MemReCache' , 10);
+      return array('notag_MemReCache0' , 10);
       
    }
       
