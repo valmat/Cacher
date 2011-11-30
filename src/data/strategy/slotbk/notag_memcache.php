@@ -77,7 +77,26 @@ class Cacher_Backend_notag_Memcache  implements Cacher_Backend{
      */
     function tagsType() {
         return CacheTagTypes::NOTAG;
-    }    
+    }
+    
+    /*
+     * Возвращает объект блокировки и спользуемой в этом бэкенде.
+     * Либо false, если блокировки не используются
+     * @param void
+     * @return false
+     */
+    public function lock() {
+        return false;
+    }
+    
+    /*
+     * Возвращает ключ
+     * @param void
+     * @return string
+     */
+    public function getKey() {
+        return $this->key;
+    }
+    
 }
 
-?>

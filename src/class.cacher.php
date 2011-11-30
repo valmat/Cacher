@@ -83,12 +83,13 @@ final class Cacher {
 	list($BackendName, $LifeTime) = call_user_func('Cacher_Slot_'.$SlotName);
 	
 	require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
-	$BackendName = 'Cacher_Backend_'.$BackendName;
+	$bksgn = $BackendName;
+	$BackendName = 'Cacher_Backend_'. $BackendName;
 	
 	if(is_array($arg)) {
 	    $CacheKeys = array();
 	    foreach($arg as $key) {
-		$CacheKeys[$key] = self::NAME_SPACE . $SlotName . ':' . $key;
+		$CacheKeys[$key] = (crc32(self::NAME_SPACE . "($bksgn)" . $SlotName)+0x100000000) . ':' . $key;
 	    }
 	    
 	    $slots = array();
@@ -104,7 +105,7 @@ final class Cacher {
 	    }
 	    return $slots;
 	} else {
-	    $CacheKey = self::NAME_SPACE . $SlotName . ':' . $arg;
+	    $CacheKey = (crc32(self::NAME_SPACE . "($bksgn)" . $SlotName)+0x100000000) . ':' . $arg;
 	    $slot = new Cacher();
 	    $slot->LifeTime = $LifeTime;
 	    $slot->Backend = new $BackendName($CacheKey);
@@ -135,7 +136,13 @@ final class Cacher {
      * @return mixed   Complex data or false if no cache entry is found.
      */
     public function get() {
-        return (NULL === $this->val) ? $this->Backend->get() : $this->val;
+        $ret = (NULL === $this->val) ? $this->Backend->get() : $this->val;
+	
+	# Блокировка ставится для того, что бы тоолкьо один процес занимался заполнением кеша
+	(false === $ret) &&
+	    ($lock = $this->Backend->lock()) && $lock->set($this->Backend->getKey());
+	
+	return $ret;
     }
     
     /*
@@ -147,7 +154,20 @@ final class Cacher {
      */
     public function set($val) {
 	$this->val = $val;
-	return $this->Backend->set($val, $this->Tags, $this->LifeTime);
+	if(false===($lockObj = $this->Backend->lock())) {
+	    # Если блокировка не предусмотрена, то просто устанавливаем кеш
+	    return $this->Backend->set($val, $this->Tags, $this->LifeTime);
+	}
+	
+        if(!$lockObj->get($key = $this->Backend->getKey())) {
+            # Если блокировку установил другой процесс, то он пусть и устанавливает кеш
+	    return $val;
+        }
+	$this->Backend->set($val, $this->Tags, $this->LifeTime);
+        
+        # Сбрасываем блокировку
+        $lockObj->del($key);
+	return $val;
     }
 
     /*

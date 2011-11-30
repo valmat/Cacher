@@ -37,7 +37,7 @@
  * 
  */
 
-require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memcache.php';
+require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memstore.php';
 
 class Cacher_Backend_MemReFile implements Cacher_Backend {
     /**
@@ -61,11 +61,6 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
      */
     const  NAME_SPACE   = Cacher::NAME_SPACE;
     
-    /**
-      * Имя используемого класса блокировки
-      */
-    const LOCK_NAME = 'Cacher_Lock_Memcache';
-    
     private static $memcache=null;
     private $key;
     
@@ -85,7 +80,6 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
     }
     
     public function get() {
-        $lock = self::LOCK_NAME;
         # Если объекта в мем кеше не нашлось, то ищем в файле
         # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
         
@@ -93,7 +87,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
         //if( false===( $cobj=self::$memcache->get($this->key) ) ){
             # Пытаемся установить блокировку
             # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-            if($lock::set($this->key))
+            if(self::lock()->set($this->key))
                 return false;
             # Пытаемся получить Кеш из файла
             $this->getPath();
@@ -138,14 +132,14 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
      * @param $cobj array
      */
     private static function mainGet($key, &$c_arr) {
-        $lock = self::LOCK_NAME;
+        $lock = self::lock();
         $cobj   = $c_arr[$key];
         
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
         if(!isset($c_arr[self::EXPR_PREF . $key]) || $c_arr[self::EXPR_PREF . $key]/*expire*/ < time() ){
             # Пытаемся установить блокировку
             # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-            if($lock::set($key))
+            if($lock->set($key))
                 return false;
             return $cobj['data'];
         }
@@ -159,7 +153,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
         $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
-            if($lock::set($key))
+            if($lock->set($key))
                 return false;
             return $cobj['data'];
         }
@@ -167,7 +161,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
         # Если кеш протух по тегам, то сообщаем об этом
         foreach($tags as $tag_k => $tag_v){
             if($tags_mc[$tag_k]>$tag_v){
-                if($lock::set($key))
+                if($lock->set($key))
                     return false;
                 return $cobj['data'];
             }
@@ -183,12 +177,6 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
      * @param $CacheVal string,  string, $tags array, $LifeTime int
      */
     function set($CacheVal, $tags, $LifeTime){
-        $lock = self::LOCK_NAME;
-        # Если блокировку установил текущий процесс, то устанавливаем кеш.
-        if(!$lock::get($this->key)) {
-            return $CacheVal;
-        }
-        
         $thetime = time();
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
@@ -226,8 +214,6 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
         # Атомарно перемещаем файл с данными кеша в файловый кеш
         rename($tmp_file, $this->fullpath);
         
-        # Снимаем блокировку
-        $lock::del($this->key);
         return $CacheVal;
     }
     
@@ -275,5 +261,23 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
         return self::EXPR_PREF . $key;
     }
     
+    /*
+     * Возвращает объект блокировки и спользуемой в этом бэкенде.
+     * Либо false, если блокировки не используются
+     * @param void
+     * @return Cacher_Lock object or false
+     */
+    public function lock() {
+        return Cacher_Lock_Memstore::init();
+    }
+    
+    /*
+     * Возвращает ключ
+     * @param void
+     * @return string
+     */
+    public function getKey() {
+        return $this->key;
+    }
+    
 }
-

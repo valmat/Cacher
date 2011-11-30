@@ -29,7 +29,7 @@
  * 
  */
 
-require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memcache.php';
+require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memstore.php';
 
 class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
     
@@ -37,11 +37,6 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
     const MAX_LTIME = CONFIG_Cacher_BK_MemReCache0::MAX_LTIME;
-    
-    /**
-      * Имя используемого класса блокировки
-      */
-    const LOCK_NAME = 'Cacher_Lock_Memcache';
     
     private static $memcache=null;
     private $key;
@@ -52,17 +47,16 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
     }
     
     public function get() {
-        self::$asdf = 55;
         # если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===($cobj = self::$memcache->get($this->key)) || !isset($cobj[0]) || !isset($cobj[1]) )
             return false;
         list($rez, $expire) = $cobj;
         
-        $lock = self::LOCK_NAME;
+        
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
         # Пытаемся установить блокировку
         # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-        if($expire < time() && $lock::set($this->key)){
+        if($expire < time() && self::lock()->set($this->key)){
             return false;
         }
         return $rez;
@@ -80,14 +74,13 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
            return false;
         
         $rez = array();
-        $lock = self::LOCK_NAME;
         foreach($keys as $id => $key) {
             if(!isset($cobj[$key])) {
                 $rez[$id] = false;
                 continue;
             }
             list($obj, $expire) = $cobj[$key];
-            if($expire < time() && $lock::set($key)){
+            if($expire < time() && self::lock()->set($key)){
                 $rez[$id] = false;
                 continue;
             }
@@ -102,21 +95,13 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
      * function set
      * @param $CacheVal string, $tags array, $LifeTime int
      */
-    function set($CacheVal, $tags, $LifeTime){
-        $lock = self::LOCK_NAME;
-        if(!$lock::get($this->key)) {
-            return $CacheVal;
-        }
-        
+    public function set($CacheVal, $tags, $LifeTime){
         $thetime = time();
         $cobj = Array(
                       0 => $CacheVal,
                       1 => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime)
                      );
         self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
-        
-        # Сбрасываем блокировку
-        $lock::del($this->key);
         return $CacheVal;
     }
     
@@ -125,7 +110,7 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
      * Удаление с перекешированием в этом слоте не поддерживается
      * function del
      */
-    function del(){
+    public function del(){
         return self::$memcache->delete($this->key, 0);
     }
     
@@ -134,10 +119,28 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
      * @param void
      * @return string Cache tag type throw CacheTagTypes namespace
      */
-    function tagsType() {
+    public function tagsType() {
         return CacheTagTypes::NOTAG;
+    }
+    
+    /*
+     * Возвращает объект блокировки и спользуемой в этом бэкенде.
+     * Либо false, если блокировки не используются
+     * @param void
+     * @return Cacher_Lock object or false
+     */
+    public function lock() {
+        return Cacher_Lock_Memstore::init();
+    }
+    
+    /*
+     * Возвращает ключ
+     * @param void
+     * @return string
+     */
+    public function getKey() {
+        return $this->key;
     }
 
 }
 
-?>

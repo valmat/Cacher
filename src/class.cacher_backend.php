@@ -31,18 +31,31 @@ interface Cacher_Backend {
     public function set($CacheVal, $tags, $LifeTime);
     
     /*
-     * function del
      * Очистить кеш по ключу
      */
     public function del();
     
     /*
-     * tagsType()
      * Тип используемых тегов. Знание о тегах должно храниться именно в слоте
      * @param void
      * @return string Cache tag type throw CacheTagTypes namespace
      */
     public function tagsType();
+    
+    /*
+     * Возвращает объект блокировки и спользуемой в этом бэкенде.
+     * Либо false, если блокировки не используются
+     * @param void
+     * @return Cacher_Lock object or false
+     */
+    public function lock();
+    
+    /*
+     * Возвращает ключ
+     * @param void
+     * @return string
+     */
+    public function getKey();
     
  }
 

@@ -29,18 +29,16 @@
  * 
  */
 
-require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memcache.php';
+require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memstore.php';
+/**
+ *  MEMSTORE
+ */
 
 class Cacher_Backend_MemReCache0 implements Cacher_Backend{
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
     const MAX_LTIME = CONFIG_Cacher_BK_MemReCache0::MAX_LTIME;
-    
-    /**
-      * Имя используемого класса блокировки
-      */
-    const LOCK_NAME = 'Cacher_Lock_Memcache';
     
     private static $memcache=null;
     private $key;
@@ -82,12 +80,12 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
      * @param $cobj array
      */
     private static function mainGet($key, &$cobj) {
-        $lock = self::LOCK_NAME;
+        $lock = self::lock();
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
         if($cobj['expire'] < time()){
             # Пытаемся установить блокировку
             # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-            if($lock::set($key))
+            if($lock->set($key))
                 return false;
             return $cobj['data'];
         }
@@ -101,7 +99,7 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
         $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
-            if($lock::set($key))
+            if($lock->set($key))
                 return false;
             return $cobj['data'];        
         }
@@ -109,7 +107,7 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
         # Если кеш протух по тегам, то сообщаем об этом
         foreach($tags as $tag_k => $tag_v){
             if($tags_mc[$tag_k]>$tag_v){
-                if($lock::set($key))
+                if($lock->set($key))
                     return false;
                 return $cobj['data'];        
             }
@@ -125,11 +123,6 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
      * @param $CacheVal string, $tags array, $LifeTime int
      */
     function set($CacheVal, $tags, $LifeTime){
-        $lock = self::LOCK_NAME;
-        if(!$lock::get($this->key)) {
-            return $CacheVal;
-        }
-        
         $thetime = time();
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
@@ -151,8 +144,6 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
                       'tags' => $tags_mc
                      );
         self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
-        
-        $lock::del($this->key);
         return $CacheVal;
     }
     
@@ -171,6 +162,25 @@ class Cacher_Backend_MemReCache0 implements Cacher_Backend{
      */
     function tagsType() {
         return CacheTagTypes::MC;
+    }
+    
+    /*
+     * Возвращает объект блокировки и спользуемой в этом бэкенде.
+     * Либо false, если блокировки не используются
+     * @param void
+     * @return Cacher_Lock object or false
+     */
+    public function lock() {
+        return Cacher_Lock_Memstore::init();
+    }
+    
+    /*
+     * Возвращает ключ
+     * @param void
+     * @return string
+     */
+    public function getKey() {
+        return $this->key;
     }
 
 }

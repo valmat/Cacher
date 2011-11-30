@@ -5,7 +5,30 @@
  * 
  */
 
-interface Cacher_Lock {
+abstract class Cacher_Lock {
+    
+    /**
+      * Флаг установленной блокировки
+      * После установки этот флаг помечается в true
+      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
+      * Затем флаг блокировки должен быть снят: self::$locked[$key] = false;
+      */
+    protected static $lock = NULL;
+    
+    /**
+      * Флаг установленной блокировки
+      * После установки этот флаг помечается в true
+      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
+      * Затем флаг блокировки должен быть снят: self::$locked[$key] = false;
+      */
+    protected static $locked = array();
+    
+    static function init(){
+        if(NULL===self::$lock){
+           self::$lock = new static;
+        }
+        return self::$lock;
+    }
     
     /*
      * function set
@@ -14,7 +37,7 @@ interface Cacher_Lock {
      * @param $key string
      * @return bool
      */
-    static function set($key);
+    abstract public function set($key);
     
     /*
      * function del
@@ -22,7 +45,7 @@ interface Cacher_Lock {
      * @param $key string
      * @return bool
      */
-    static function del($key);
+    abstract public function del($key);
     
     /*
      * function get
@@ -30,7 +53,7 @@ interface Cacher_Lock {
      * @param $key string
      * @return bool
      */
-    static function get($key);
+    abstract public function get($key);
     
 }
 

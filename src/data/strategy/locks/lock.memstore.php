@@ -5,9 +5,9 @@
  * 
  */
 
-class Cacher_Lock_Memcache implements Cacher_Lock {
+class Cacher_Lock_Memstore extends Cacher_Lock {
     
-    protected static $memcache=null;
+    protected static $memcache=NULL;
     
     /**
       * Префикс для формирования ключа блокировки
@@ -21,14 +21,6 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
       */
     const LOCK_TIME = CONFIG_Cacher_Lock_Memcache::LOCK_TIME;
     
-    /**
-      * Флаг установленной блокировки
-      * После установки этот флаг помечается в true
-      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
-      * Затем флаг блокировки должен быть снят: self::$locked[$key] = false;
-      */
-    private static $locked = array();
-    
     /*
      * function set
      * проверяем не установил ли кто либо блокировку
@@ -36,7 +28,7 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
      * @param $key string
      * @return bool
      */
-    static function set($key) {
+    public function set($key) {
         !self::$memcache && ( self::$memcache = Mcache::init() );
         self::$locked[$key] = isset(self::$locked[$key]) && self::$locked[$key];
         if( !(self::$locked[$key]) && !(self::$memcache->get(self::LOCK_PREF . $key)) )
@@ -50,7 +42,7 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
      * @param $key string
      * @return bool
      */
-    static function del($key) {
+    public function del($key) {
         !self::$memcache && ( self::$memcache = Mcache::init() );
         if(isset(self::$locked[$key]) && self::$locked[$key] && self::$memcache->delete(self::LOCK_PREF . $key, 0)) {
             unset(self::$locked[$key]);
@@ -65,7 +57,7 @@ class Cacher_Lock_Memcache implements Cacher_Lock {
      * @param $key string
      * @return bool
      */
-    static function get($key) {
+    public function get($key) {
         return isset(self::$locked[$key]) && self::$locked[$key];
     }
     

@@ -18,7 +18,7 @@ class Mcache {
       */
     const COMPRES   = false;
     
-    static $memcache = null;
+    private static $memcache = null;
     static function init(){
         if(null===self::$memcache){
            self::$memcache = new Memcache;
