@@ -101,7 +101,9 @@ function print_time($cmnt = ''){
         //$slot->addTag(Cacher_Tag::create('SmplTag',  $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
         //$slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
         
-        //Cacher_Tag::create('SmplTag', $User)->getKey();
+        //echo "<hr>setTag: ", Cacher_Tag::create('SmplTag', $key)->getKey();
+        $slots[$key]->addTag( Cacher_Tag::create('SmplTag', $key) );
+        
         
         //sleep(1);// hard data
         
@@ -111,6 +113,13 @@ function print_time($cmnt = ''){
         $CacheData[$key] = $val;
     }
     
+    Cacher_Tag::create('SmplTag', 50)->clear();
+    
+    //$slots[10]->del();
+    echo "<hr><pre>";
+    var_export($slots);
+    echo '</pre><hr>';
+
     
     
     //$slot->del();
