@@ -91,6 +91,8 @@ function print_time($cmnt = ''){
     $slots = Cacher::create('Test', $keys);
     $CacheData = array();
     
+    //echo "<hr><pre>";var_export($slots);echo '</pre><hr>'; exit;
+    
     foreach($slots as $key => $slot) {
         if( !($CacheData[$key] = $slot->get()) ) {
             $toFill[] = $key;
@@ -102,13 +104,15 @@ function print_time($cmnt = ''){
         //$slot->addTag(Cacher_Tag::create('SmplTag1', $User)); // Создаем и сразуже добавляем новый тег к слоту перед сохрананеием в кеш
         
         //echo "<hr>setTag: ", Cacher_Tag::create('SmplTag', $key)->getKey();
+        
+        
         $slots[$key]->addTag( Cacher_Tag::create('SmplTag', $key) );
         
         
         //sleep(1);// hard data
         
         $val =$rez[$key];
-        echo '<hr><font color=blue>to cache</font><hr>';
+        echo '<br><font color=blue>to cache</font><br>';
         $slots[$key]->set($val);
         $CacheData[$key] = $val;
     }

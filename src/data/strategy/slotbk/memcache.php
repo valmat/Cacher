@@ -45,40 +45,59 @@ class Cacher_Backend_Memcache  extends Cacher_Backend{
      * Получение кеша
      * function get
      */
-    protected function singleGet() {
+    public function get() {
         # если объекта в кеше не нашлось
         if( false===($cobj = self::$memcache->get($this->key)) )
-           return false;
-        
-        $tags = $cobj['tags'];
-        $tags_cnt = count($tags);
-        
-        # Если тегов нет, то просто отдаем объект. Тогда дальше можно считать 0!=$tags_cnt
-        if(0==$tags_cnt)
-          return $cobj['data'];
-        
-        $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
-        # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш объекта ассоциированного с этим тегом
-        if( count($tags_mc)!= $tags_cnt)
-          return false;
-        
-        # Если кеш протух по тегам, то сообщаем об этом
-        foreach($tags as $tag_k => $tag_v){
-            if($tags_mc[$tag_k]>$tag_v)
-              return false;
-        }
-        
-        return $cobj['data'];
+            return false;
+        return self::mainGet($this->key, $cobj);
     }
     
     /*
      * Получение кеша для мультиключа
      * function get
      */
-    protected function multiGet(){
-        #
+    static function multiGet($keys){
+        !self::$memcache && (self::$memcache = Mcache::init());
+        # Если объекта в кеше не нашлось, то безусловно перекешируем
+        if( false===( $Cobjs = self::$memcache->get( $keys )) ){
+            return false;
+        }
+        
+        $rekeys = array_flip($keys);
+        $rez = array_fill_keys($rekeys, false);
+        foreach($Cobjs as $rekey => $cobj) {
+            $rez[$rekeys[$rekey]] = self::mainGet($rekey, $cobj);
+        }
+        return $rez;
     }
-
+        
+    /*
+     * function mainGet
+     * @param $key string
+     * @param $c_arr array
+     */
+    private static function mainGet($key, &$cobj) {
+        $tags = $cobj['tags'];
+        $tags_cnt = count($tags);
+        
+        # Если тегов нет, то просто отдаем объект. Тогда дальше можно считать 0!=$tags_cnt
+        if(0==$tags_cnt)
+            return $cobj['data'];
+        
+        $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
+        # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш объекта ассоциированного с этим тегом
+        if( count($tags_mc)!= $tags_cnt)
+            return false;
+        
+        # Если кеш протух по тегам, то сообщаем об этом
+        foreach($tags as $tag_k => $tag_v){
+            if($tags_mc[$tag_k]>$tag_v)
+                return false;
+        }
+        
+        return $cobj['data'];
+    }
+        
     /*
      * Установка значения кеша по ключу вместе с тегами и указанием срока годности кеша
      * function set

@@ -98,9 +98,8 @@ final class Cacher {
 		    $CacheKey = $CacheKeys[$key];
 		    $slot->LifeTime = $LifeTime;
 		    $slot->Backend = new $BackendName($CacheKey);
-    		} else {
-		    $slot->val = $val;
-		}
+    		}
+		$slot->val = $val;
 		$slots[$key] = $slot;
 	    }
 	    return $slots;
@@ -136,7 +135,7 @@ final class Cacher {
      * @return mixed   Complex data or false if no cache entry is found.
      */
     public function get() {
-        return (NULL == $this->val) ? $this->Backend->get() : $this->val;
+        return (NULL === $this->val) ? $this->Backend->get() : $this->val;
     }
     
     /*

@@ -19,7 +19,8 @@ class Cache_Tag_Backend_Memcache  implements Cache_Tag_Backend{
      * @param $tagKey string
      */
     function clearTag($tagKey){
-        return self::$memcache->set($tagKey, time(), false, 0 );
+        //return self::$memcache->set($tagKey, time(), false, 0 );
+        return self::$memcache->delete($tagKey, 0 );
     }
     
 }
