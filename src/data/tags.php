@@ -19,41 +19,25 @@
   *   }
   */
    
-   /**
-    *   Any simple tag
-    * # CacheTypes::SAFE
-    */
-   class Cacher_Tag_SmplTag extends Cacher_Tag {
-      /*
-       * function setKey
-       * @param User
-       * @return string tag key
-       */
-       static function setKey($var){
-         return 'profile_'.$var->id;
-       }
-       static function getBkName(){
-         return CacheTagTypes::FAST;
-       }
-   }
-   
-   /**
-    *   Any simple tag 1
-    * # CacheTypes::SAFE
-    */
-   class Cacher_Tag_SmplTag1 extends Cacher_Tag {
-      /*
-       * function setKey
-       * @param User
-       * @return string tag key
-       */
-       static function setKey($var){
-         return 'profile_'.$var->id;
-       }
-       static function getBkName(){
-         return CacheTagTypes::FAST;
-       }
-   }
-
+    /**
+     *   Any simple tag
+     * # CacheTypes::SAFE
+     */
+    class Cacher_Tag_SmplTag extends Cacher_Tag {
+        static function getBkName(){
+            return CacheTagTypes::MC;
+        }
+    }
+    
+    /**
+     *   Any simple tag 1
+     * # CacheTypes::SAFE
+     */
+    class Cacher_Tag_SmplTag1 extends Cacher_Tag {
+        static function getBkName(){
+            return CacheTagTypes::MC;
+        }
+    }
+ 
 
 ?>

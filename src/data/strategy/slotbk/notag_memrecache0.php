@@ -29,29 +29,11 @@
  * 
  */
 
+require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memcache.php';
+
 class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
     
     private static $memcache=null;
-    
-    const NAME      = 'notag_MemReCache0';
-    
-    /**
-      * сжатие memcache
-      */
-    const COMPRES   = false;//MEMCACHE_COMPRESSED;
-    
-    /**
-      * Префикс для формирования ключа блокировки
-      */
-    const LOCK_PREF = CONFIG_Cacher_BK_MemReCache0::LOCK_PREF;
-    
-    /**
-      * Время жизни ключа блокировки. Если во время перестроения кеша процесс аварийно завершится,
-      * то блокировка останется включенной и другие процессы будут продолжать выдавать протухший кеш LOCK_TIME секунд.
-      * С другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состояние гонки и блокировочный механизм перестанет работать.
-      * Т.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
-      */
-    const LOCK_TIME = CONFIG_Cacher_BK_MemReCache0::LOCK_TIME;
     
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
@@ -59,42 +41,55 @@ class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
     const MAX_LTIME = CONFIG_Cacher_BK_MemReCache0::MAX_LTIME;
     
     /**
-      * Флаг установленной блокировки
-      * После установки этот флаг помечается в true
-      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $this->key)]
-      * Затем флаг блокировки должен быть снят: $this->is_locked = false;
+      * Имя используемого класса блокировки
       */
-    private        $is_locked = false;
+    const LOCK_NAME = 'Cacher_Lock_Memcache';
     
-    function __construct($CacheKey, $nameSpace) {
-        parent::__construct($CacheKey, $nameSpace);
-        $this->key = $nameSpace . $CacheKey;
+    function __construct($CacheKey) {
+        parent::__construct($CacheKey);
         self::$memcache = Mcache::init();
     }
     
-    /*
-     * проверяем не установил ли кто либо блокировку
-     * Если блокировка не установлена, пытаемся создать ее методом add, что бы предотвратить состояние гонки
-     * function set_lock
-     * @param $arg void
-     */
-    private function set_lock() {
-        if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $this->key)) )
-           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key, true, false, self::LOCK_TIME);
-        return $this->is_locked;
-    }
-    
-    function get(){
+    public function get(){
         # если объекта в кеше не нашлось, то безусловно перекешируем
         if( false===($cobj = self::$memcache->get($this->key)) || !isset($cobj[0]) || !isset($cobj[1]) )
-           return false;
+            return false;
         list($rez, $expire) = $cobj;
         
+        $lock = self::LOCK_NAME;
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
         # Пытаемся установить блокировку
         # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-        if($expire < time() && $this->set_lock()){
-          return false;
+        if($expire < time() && $lock::set($this->key)){
+            return false;
+        }
+        return $rez;
+    }
+    
+    /*
+     * Получение кеша для мультиключа
+     * function get
+     */
+    static function multiGet($keys){
+        !self::$memcache && (self::$memcache = Mcache::init());
+        
+        # если объекта в кеше не нашлось, то безусловно перекешируем
+        if( false===($cobj = self::$memcache->get($keys)))
+           return false;
+        
+        $rez = array();
+        $lock = self::LOCK_NAME;
+        foreach($keys as $id => $key) {
+            if(!isset($cobj[$key])) {
+                $rez[$id] = false;
+                continue;
+            }
+            list($obj, $expire) = $cobj[$key];
+            if($expire < time() && $lock::set($key)){
+                $rez[$id] = false;
+                continue;
+            }
+            $rez[$id] = $obj;
         }
         return $rez;
     }
@@ -107,21 +102,17 @@ class Cacher_Backend_notag_MemReCache0 extends Cacher_Backend{
      */
     function set($CacheVal, $tags, $LifeTime){
         $thetime = time();
-        
+        $lock = self::LOCK_NAME;
         $cobj = Array(
                       0 => $CacheVal,
                       1 => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime)
                      );
-        self::$memcache->set($this->key, $cobj, self::COMPRES, 0);
+        self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
         
         # Сбрасываем блокировку
-        if($this->is_locked){
-            $this->is_locked = false;
-            self::$memcache->delete(self::LOCK_PREF . $this->key, 0);
-        }
+        $lock::del($this->key);
         
         return $CacheVal;
-
     }
     
     /*

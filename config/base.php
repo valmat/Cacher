@@ -8,10 +8,15 @@
   *  for prevention multi memcache connect
   */
 
- class Mcache {
+class Mcache {
     
     const  HOST = 'unix:///tmp/memcached.socket';
     const  PORT = 0;
+    
+    /**
+      * сжатие memcache
+      */
+    const COMPRES   = false;
     
     static $memcache = null;
     static function init(){

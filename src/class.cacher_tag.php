@@ -7,8 +7,7 @@
  * 
  */
  
-abstract class Cacher_Tag 
-{
+abstract class Cacher_Tag {
    
     /**
      *  NameSpase prefix for cache key
@@ -30,13 +29,13 @@ abstract class Cacher_Tag
      *  Backend object responsible for this cache tag.
      *  @var Cacher_Backend
      */
-    private   $Backend = null;
+    protected   $Backend = null;
   
     /**
      * Calculated ID associated to this Tag
      * @var string
      */
-    private $tagkey = null;
+    protected   $tagkey  = null;
 
     /**
      * Creates a new Tag object.
@@ -52,9 +51,11 @@ abstract class Cacher_Tag
         if (!defined('CACHER_TAG_REQUIRED'))
           require self::PATH_TAGS;
         
-        $TagName = 'Cacher_Tag_'.$TagName;
-        $newTag = new $TagName();
-        $newTag->tagkey = self::NAME_SPACE . call_user_func($TagName.'::setKey', $arg);
+        $ClassName = 'Cacher_Tag_'.$TagName;
+        $newTag = new $ClassName();
+        
+        //$newTag->tagkey = self::NAME_SPACE . call_user_func($TagName.'::setKey', $arg);
+        $newTag->tagkey = self::NAME_SPACE .':'. $TagName .':'. $arg;
         return $newTag;
     }
     
@@ -89,21 +90,14 @@ abstract class Cacher_Tag
      * @return void
      */
     private function getBackend(){
-        if(null==$this->Backend){
+        if(null==$this->Backend) {
             $BackendName = $this->getBkName();
-            require_once self::PATH_BACKENDS .'tagbk/'. strtolower($BackendName) . 'tag.php';
+            require_once self::PATH_BACKENDS .'tagbk/'. strtolower($BackendName) . '.php';
             $BackendName = 'Cache_Tag_Backend_'.$BackendName;
             $this->Backend = new $BackendName();
         }
         return $this->Backend;
     }
-    
-    /*
-     * abstract function setKey
-     * @param object
-     * @return string tag key
-     */
-    abstract static function setKey($var);
     
     /*
      * abstract function getBkName
@@ -119,8 +113,7 @@ abstract class Cacher_Tag
  * 
  */
 
-interface Cache_Tag_Backend
- {
+interface Cache_Tag_Backend {
      /*
      * Очишает кеш по тегу
      * function clearTag
@@ -128,4 +121,3 @@ interface Cache_Tag_Backend
      */
     function clearTag($tagKey);
  }
-?>

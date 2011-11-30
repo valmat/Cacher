@@ -56,9 +56,15 @@ final class Cacher {
      * @var array of Cacher_Tag
      */
     private    $Tags = Array();
+    /**
+     * array of self objects in multiget mode
+     * @var array self
+     */
+    private    $val = NULL;
     
     /*
      * private constructor
+     * For create object, use self::create
      */
     private function __construct() {}
     
@@ -70,31 +76,42 @@ final class Cacher {
      * @param $SlotName
      * @param $arg
      */
-    static function create($SlotName, $arg) {
-      if (!defined('CACHER_SLOT_REQUIRED'))
-        require self::PATH_SLOTS;
-        
-      $SlotName = 'Cacher_Slot_'.$SlotName;
-      $Options = $SlotName($arg);
+    static function create($SlotName, $arg='') {
+	if (!defined('CACHER_SLOT_REQUIRED'))
+	    require self::PATH_SLOTS;
+	
+	list($BackendName, $LifeTime) = call_user_func('Cacher_Slot_'.$SlotName);
+	
+	require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
+	$BackendName = 'Cacher_Backend_'.$BackendName;
+	
+	if(is_array($arg)) {
+	    $CacheKeys = array();
+	    foreach($arg as $key) {
+		$CacheKeys[$key] = self::NAME_SPACE . $SlotName . ':' . $key;
+	    }
+	    
+	    $slots = array();
+	    foreach($BackendName::multiGet($CacheKeys) as $key => $val) {
+		$slot = new Cacher();
+		if( false === $val || NULL === $val ) {
+		    $CacheKey = $CacheKeys[$key];
+		    $slot->LifeTime = $LifeTime;
+		    $slot->Backend = new $BackendName($CacheKey);
+    		}
+		$slot->val = $val;
+		$slots[$key] = $slot;
+	    }
+	    return $slots;
+	} else {
+	    $CacheKey = self::NAME_SPACE . $SlotName . ':' . $arg;
+	    $slot = new Cacher();
+	    $slot->LifeTime = $LifeTime;
+	    $slot->Backend = new $BackendName($CacheKey);
+	    return $slot;
+	}
+    }
       
-      $SelfObj = new Cacher();
-      $SelfObj->LifeTime    = $Options[1];
-      $SelfObj->Backend     = self::setBackend($Options[0]/*BackendName*/, $Options[2]/*CacheKey*/);
-      return $SelfObj;
-    }
-    
-    /*
-     * function setOption
-     * Этот метод создан для использования в в Слоте
-     * 
-     * @param $Backend Cacher_Backend
-     * @param $LifeTime int
-     * @param $key string
-     */
-    static function setOption($BackendName, $LifeTime, $key) {
-        return Array($BackendName, $LifeTime, $key);
-    }
-  
     /**
      * Добавляет тег к слоту
      * 
@@ -103,25 +120,11 @@ final class Cacher {
      */
     public function addTag(Cacher_Tag $tag) {
         if ($tag->getBkName() == $this->Backend->tagsType()) {
-            $this->Tags[] = $tag->getKey();
+	    $this->Tags[] = $tag->getKey();
             return true;
         }
         trigger_error('Backends for tag ' . get_class($tag) . ' and slot ' . get_class($this) . ' must be same', E_USER_WARNING);
         return false;
-    }
-    
-    /*
-     * Фабричный метод создания бэкэнда
-     * Возвращает объект бэкенда по его имени. Попутно проверяет доступно ли использовать данное имя.
-     * Лучше всего использовать этот метод, чем создавать объект быкенда на прямую.
-     * function setBackend
-     * @param $BackendName string
-     * @param $CacheKey string
-     */
-    static function setBackend($BackendName, $CacheKey) {
-        require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
-        $BackendName = 'Cacher_Backend_'.$BackendName;
-        return new $BackendName($CacheKey, self::NAME_SPACE);
     }
     
     /*
@@ -132,19 +135,19 @@ final class Cacher {
      * @return mixed   Complex data or false if no cache entry is found.
      */
     public function get() {
-        return $this->Backend->get();
+        return (NULL === $this->val) ? $this->Backend->get() : $this->val;
     }
     
     /*
+     * function set
      * Установить кешу значение $val
      * Saves a data for this slot. 
-     * 
-     * function set
      * @param mixed $val  Data to be saved.
      * @return bool - успешность операции
      */
     public function set($val) {
-        return $this->Backend->set($val, $this->Tags, $this->LifeTime);
+	$this->val = $val;
+	return $this->Backend->set($val, $this->Tags, $this->LifeTime);
     }
 
     /*
@@ -155,7 +158,8 @@ final class Cacher {
      * @return void
      */
     public function del() {
-        $this->Backend->del();
+	$this->val = NULL;
+	$this->Backend->del();
     }
   
 }

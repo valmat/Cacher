@@ -33,27 +33,12 @@
  * 
  */
 
+require_once CONFIG_Cacher::PATH_BACKENDS . 'locks/lock.memcache.php';
+
 class Cacher_Backend_notag_MemReCache extends Cacher_Backend {
     
     private static $memcache=null;
     
-    const NAME      = 'notag_MemReCache';
-    /**
-      * сжатие memcache
-      */
-    const COMPRES   = false;//MEMCACHE_COMPRESSED;
-    
-    /**
-      * Префикс для формирования ключа блокировки
-      */
-    const LOCK_PREF = CONFIG_Cacher_BK_MemReCache::LOCK_PREF;
-    /**
-      * Время жизни ключа блокировки. Если во время перестроения кеша процесс аварийно завершится,
-      * то блокировка останется включенной и другие процессы будут продолжать выдавать протухший кеш LOCK_TIME секунд.
-      * С другой стороны если срок блокировки истечет до того, как кеш будет перестроен, то возникнет состояние гонки и блокировочный механизм перестанет работать.
-      * Т.е. LOCK_TIME нужно устанавливать таким, что бы кеш точно успел быть построен, и не слишком больши, что бы протухание кеша было заметно в выдаче клиенту
-      */
-    const LOCK_TIME = CONFIG_Cacher_BK_MemReCache::LOCK_TIME;
     /**
       * MAX_LifeTIME - максимальное время жизни кеша. По умолчанию 29 дней. Если методу set передан $LifeTime=0, то будет установлено 'expire' => (time()+self::MAX_LTIME)
       */
@@ -64,43 +49,64 @@ class Cacher_Backend_notag_MemReCache extends Cacher_Backend {
     const EXPR_PREF = CONFIG_Cacher_BK_MemReCache::EXPR_PREF;
     
     /**
-      * Флаг установленной блокировки
-      * После установки этот флаг помечается в true
-      * В методе set проверяется данный флаг, и только если он установлен, тогда снимается блокировка [self::$memcache->delete(self::LOCK_PREF . $CacheKey)]
-      * Затем флаг блокировки должен быть снят: $this->is_locked = false;
+      * Имя используемого класса блокировки
       */
-    private        $is_locked = false;
+    const LOCK_NAME = 'Cacher_Lock_Memcache';
     
-    function __construct($CacheKey, $nameSpace) {
-        parent::__construct($CacheKey, $nameSpace);
-        $this->key = $nameSpace . $CacheKey;
+    function __construct($CacheKey) {
+        parent::__construct($CacheKey);
         self::$memcache = Mcache::init();
     }
     
-    /*
-     * проверяем не установил ли кто либо блокировку
-     * Если блокировка не установлена, пытаемся создать ее методом add, что бы предотвратить состояние гонки
-     * function set_lock
-     * @param $arg void
-     */
-    private function set_lock() {
-        if( !($this->is_locked) && !(self::$memcache->get(self::LOCK_PREF . $this->key)) )
-           $this->is_locked = self::$memcache->add(self::LOCK_PREF . $this->key,true,false,self::LOCK_TIME);
-        return $this->is_locked;
-    }
-    
-    function get(){
+    public function get() {
         # Если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===( $rez = self::$memcache->get($this->key) ) ){
+        if( false===( $c_arr = self::$memcache->get(array($this->key, self::EXPR_PREF . $this->key)) ) ) {
            return false;
+        }
+        if(!isset($c_arr[$this->key])) {
+            return false;
         }
         
         # Если время жизни кеша истекло, то перекешируем с условием блокировки
-        if( false===( $expire = self::$memcache->get(self::EXPR_PREF . $this->key) ) || $expire < time() ){
+        if( !isset($c_arr[self::EXPR_PREF . $this->key]) || $c_arr[self::EXPR_PREF . $this->key] < time() ){
           # Пытаемся установить блокировку
           # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
-          if($this->set_lock())
+          $lock = self::LOCK_NAME;
+          if($lock::set($this->key))
             return false;
+        }
+        return $c_arr[$this->key];
+    }
+    
+    /*
+     * Получение кеша для мультиключа
+     * function get
+     */
+    static function multiGet($keys) {
+        !self::$memcache && (self::$memcache = Mcache::init());
+        $expir_keys  = array_map ( 'self::expirKey' , $keys );
+        # Если объекта в кеше не нашлось, то безусловно перекешируем
+        if( false===( $c_arr = self::$memcache->get( array_merge ( $expir_keys, $keys ) )) ){
+            return false;
+        }
+        
+        $rez = array();
+        $lock = self::LOCK_NAME;
+        foreach($keys as $k => $key) {
+            if(!isset($c_arr[$key])) {
+                $rez[$k] = false;
+                continue;
+            }
+            # Если время жизни кеша истекло, то перекешируем с условием блокировки
+            if( !isset($c_arr[self::EXPR_PREF . $key]) || $c_arr[self::EXPR_PREF . $key] < time() ){
+                # Пытаемся установить блокировку
+                # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
+                if($lock::set($key)) {
+                    $rez[$k] = false;
+                    continue;
+                }
+            }
+            $rez[$k] = $c_arr[$key];
         }
         return $rez;
     }
@@ -115,14 +121,12 @@ class Cacher_Backend_notag_MemReCache extends Cacher_Backend {
         $thetime = time();
         $expire = (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime);
         
-        self::$memcache->set($this->key, $CacheVal, self::COMPRES, 0);
+        self::$memcache->set($this->key, $CacheVal, Mcache::COMPRES, 0);
         self::$memcache->set(self::EXPR_PREF.$this->key, $expire, false, 0);
         
         # Сбрасываем блокировку
-        if($this->is_locked){
-            $this->is_locked = false;
-            self::$memcache->delete(self::LOCK_PREF . $this->key, 0);
-        }
+        $lock = self::LOCK_NAME;
+        $lock::del($this->key);
         return $CacheVal;
     }
     
@@ -142,7 +146,15 @@ class Cacher_Backend_notag_MemReCache extends Cacher_Backend {
      */
     function tagsType() {
         return CacheTagTypes::NOTAG;
-    }    
+    }
+    
+    /*
+     * function expirKey
+     * @param $key
+     */
+    private static function expirKey($key) {
+        return self::EXPR_PREF . $key;
+    }
     
 }
 

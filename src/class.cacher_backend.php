@@ -5,45 +5,55 @@
  * 
  */
 
-abstract class Cacher_Backend
- {
-    private $key;
-    private $nameSpace;
+abstract class Cacher_Backend {
+    
+    protected $key;
         
     /*
      * Получить значение кеша если есть, или false, если отсутствует.
+     * Используется, когда Cacher инициализирован строковым ключем
      * function get
      */
-    abstract function get();
+    abstract public function get();
+        
     /*
-     * Установить данные в кеш
+     * Получить значение кеша если есть, или false, если отсутствует.
+     * Используется, когда передается массив ключей
+     * function multiGet
+     */
+    abstract static function multiGet($keys);
+    
+    /*
      * function set
+     * Установить данные в кеш
      * @param $CacheVal mixed   Данные кеша
      * @param $tags     array   Массив тегов кеширования
      * @param $LifeTime int     Время жизни кеша
      */
     abstract function set($CacheVal, $tags, $LifeTime);
+    
     /*
-     * Очистить кеш по ключу
      * function del
+     * Очистить кеш по ключу
      */
     abstract function del();
+    
     /*
-     * Тип используемых тегов. Знание о тегах должно храниться именно в слоте
      * tagsType()
+     * Тип используемых тегов. Знание о тегах должно храниться именно в слоте
      * @param void
      * @return string Cache tag type throw CacheTagTypes namespace
      */
-    abstract function tagsType(); /*{return CacheTagTypes::FAST;}*/
+    abstract function tagsType();
     
     /*
      * __construct()
-     * @param void
+     * @param $CacheKey string
      */
-    function __construct($CacheKey, $nameSpace) {
-        $this->key       = $CacheKey;
-        $this->nameSpace = $nameSpace;
+    function __construct($CacheKey) {
+        $this->key  = $CacheKey;
     }
+    
  }
 
 
