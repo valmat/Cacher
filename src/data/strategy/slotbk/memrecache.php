@@ -177,10 +177,6 @@ class Cacher_Backend_MemReCache extends Cacher_Backend  {
         self::$memcache->set(self::EXPR_PREF.$this->key, $expire, false, 0);
         self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
         
-        //if($this->is_locked){
-        //    $this->is_locked = false;
-        //    self::$memcache->delete(self::LOCK_PREF . $this->key, 0);
-        //}
         $lock = self::LOCK_NAME;
         $lock::del($this->key);
         
