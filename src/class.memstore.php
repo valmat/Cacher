@@ -179,7 +179,11 @@ class APcache implements Memstore_Interface {
      * @return mixed
      */
     public function get($key) {
-	return apc_fetch($key);
+	if(!is_array($key)) {
+	    return apc_fetch($key);
+	}
+	$rez = apc_fetch($key);
+	return $rez?$rez:array();
     }
     
     /*
