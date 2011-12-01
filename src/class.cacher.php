@@ -83,13 +83,13 @@ final class Cacher {
 	list($BackendName, $LifeTime) = call_user_func('Cacher_Slot_'.$SlotName);
 	
 	require_once self::PATH_BACKENDS .'slotbk/'. strtolower($BackendName) . '.php';
-	$bksgn = $BackendName;
+	$keyPref =  (crc32(self::NAME_SPACE . "($BackendName)" . $SlotName)+0x100000000) . ':';
 	$BackendName = 'Cacher_Backend_'. $BackendName;
 	
 	if(is_array($arg)) {
 	    $CacheKeys = array();
 	    foreach($arg as $key) {
-		$CacheKeys[$key] = (crc32(self::NAME_SPACE . "($bksgn)" . $SlotName)+0x100000000) . ':' . $key;
+		$CacheKeys[$key] = $keyPref . $key;
 	    }
 	    
 	    $slots = array();
@@ -105,7 +105,7 @@ final class Cacher {
 	    }
 	    return $slots;
 	} else {
-	    $CacheKey = (crc32(self::NAME_SPACE . "($bksgn)" . $SlotName)+0x100000000) . ':' . $arg;
+	    $CacheKey = $keyPref . $arg;
 	    $slot = new Cacher();
 	    $slot->LifeTime = $LifeTime;
 	    $slot->Backend = new $BackendName($CacheKey);
