@@ -54,8 +54,8 @@ abstract class Cacher_Tag {
         $ClassName = 'Cacher_Tag_'.$TagName;
         $newTag = new $ClassName();
         
-        //$newTag->tagkey = self::NAME_SPACE . call_user_func($TagName.'::setKey', $arg);
-        $newTag->tagkey = self::NAME_SPACE .':'. $TagName .':'. $arg;
+        //$newTag->tagkey = self::NAME_SPACE .':'. $TagName .':'. $arg;
+        $newTag->tagkey = (crc32(self::NAME_SPACE .'@'. $TagName)+0x100000000) . '@' . $arg;
         return $newTag;
     }
     

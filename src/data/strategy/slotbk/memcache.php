@@ -34,12 +34,12 @@
 
 class Cacher_Backend_Memcache  implements Cacher_Backend{
     
-    private static $memcache=null;
+    private static $memstore = NULL;
     private $key;
        
     function __construct($CacheKey) {
         $this->key  = $CacheKey;
-        self::$memcache = Mcache::init();
+        self::$memstore = Memstore::init();
     }
 
     /*
@@ -48,7 +48,7 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
      */
     public function get() {
         # если объекта в кеше не нашлось
-        if( false===($cobj = self::$memcache->get($this->key)) )
+        if( false===($cobj = self::$memstore->get($this->key)) )
             return false;
         return self::mainGet($this->key, $cobj);
     }
@@ -58,9 +58,9 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
      * function get
      */
     static function multiGet($keys){
-        !self::$memcache && (self::$memcache = Mcache::init());
+        !self::$memstore && (self::$memstore = Memstore::init());
         # Если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===( $Cobjs = self::$memcache->get( $keys )) ){
+        if( false===( $Cobjs = self::$memstore->get( $keys )) ){
             return false;
         }
         
@@ -85,7 +85,7 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
         if(0==$tags_cnt)
             return $cobj['data'];
         
-        $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
+        $tags_mc = self::$memstore->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш объекта ассоциированного с этим тегом
         if( count($tags_mc)!= $tags_cnt)
             return false;
@@ -111,7 +111,7 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
         
-        if( 0==$tags_cnt || false===($tags_mc = self::$memcache->get( $tags )) )
+        if( 0==$tags_cnt || false===($tags_mc = self::$memstore->get( $tags )) )
            $tags_mc = Array();
         
         if( $tags_cnt>0 && count($tags_mc)!= $tags_cnt)
@@ -119,14 +119,14 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
             for($i=0;$i<$tags_cnt;$i++)
                if(!isset($tags_mc[$tags[$i]])){
                    $tags_mc[$tags[$i]] = $thetime;
-                   self::$memcache->set( $tags[$i], $thetime, false, 0 );
+                   self::$memstore->set( $tags[$i], $thetime);
                }
           }
         $cobj = Array(
                       'data' => $CacheVal,
                       'tags' => $tags_mc
                      );
-        self::$memcache->set($this->key, $cobj, Mcache::COMPRES, $LifeTime);
+        self::$memstore->set($this->key, $cobj, $LifeTime);
         return $CacheVal;
     }
     
@@ -135,7 +135,7 @@ class Cacher_Backend_Memcache  implements Cacher_Backend{
      * function del
      */
     function del(){
-        return self::$memcache->delete($this->key, 0);
+        return self::$memstore->del($this->key);
     }
     
     /*

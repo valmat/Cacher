@@ -7,10 +7,10 @@
 
 class Cache_Tag_Backend_Memcache  implements Cache_Tag_Backend{
     
-    private static $memcache=null;
+    private static $memstore = NULL;
 
     function __construct() {
-        self::$memcache = Mcache::init();
+        //self::$memstore = Memstore::init();
     }
 
     /*
@@ -19,8 +19,9 @@ class Cache_Tag_Backend_Memcache  implements Cache_Tag_Backend{
      * @param $tagKey string
      */
     function clearTag($tagKey){
-        //return self::$memcache->set($tagKey, time(), false, 0 );
-        return self::$memcache->delete($tagKey, 0 );
+        //return self::$memstore->set($tagKey, time());
+        //return self::$memstore->del($tagKey);
+        return Memstore::init()->del($tagKey);
     }
     
 }

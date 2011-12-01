@@ -44,7 +44,8 @@ function print_time($cmnt = ''){
  require './config/Cacher.php';
  require './config/Cacher_Backends.php';
  //require './config/CacherTag.php';
- require './config/base.php';
+ 
+ //require './config/base.php';
  
  
  
@@ -107,6 +108,7 @@ echo '</pre><hr>';
 
 echo '<br>';
 echo '<hr>memory usage: '.(memory_get_usage()/1024-$memory_get_usage_start) .'Kb<br>';
-    print_time('end script work');
+echo '<hr>memory peak_usage: '.(memory_get_peak_usage()/1024-$memory_get_usage_start) .'Kb<br>';
+print_time('end script work');
 
 ?>
