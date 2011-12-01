@@ -61,7 +61,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
      */
     const  NAME_SPACE   = Cacher::NAME_SPACE;
     
-    private static $memcache=null;
+    private static $memstore = NULL;
     private $key;
     
     /**
@@ -76,15 +76,15 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
     
     function __construct($CacheKey) {
         $this->key  = $CacheKey;
-        self::$memcache = Mcache::init();
+        self::$memstore = Memstore::init();
     }
     
     public function get() {
         # Если объекта в мем кеше не нашлось, то ищем в файле
         # В связи с скаким-то странным глюком в memcache красивая схема с мултизапросом не прошла.
         
-        if( false===( $c_arr = self::$memcache->get( Array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) ){
-        //if( false===( $cobj=self::$memcache->get($this->key) ) ){
+        if( false===( $c_arr = self::$memstore->get( Array( $this->key, self::EXPR_PREF . $this->key ) )) || !isset($c_arr[$this->key]) ){
+        //if( false===( $cobj=self::$memstore->get($this->key) ) ){
             # Пытаемся установить блокировку
             # Если блокировку установили мы, то отправляемся перекешировать, иначе возвращаем устаревший объект из кеша
             if(self::lock()->set($this->key))
@@ -105,11 +105,11 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
      * function get
      */
     static function multiGet($keys){
-        !self::$memcache && (self::$memcache = Mcache::init());
+        !self::$memstore && (self::$memstore = Memstore::init());
         $expir_keys  = array_map ( 'self::expirKey' , $keys );
         
         # Если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===( $c_arr = self::$memcache->get( array_merge ( $expir_keys, $keys ) )) ){
+        if( false===( $c_arr = self::$memstore->get( array_merge ( $expir_keys, $keys ) )) ){
             return false;
         }
         
@@ -150,7 +150,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
         if(0==$tags_cnt)
             return $cobj['data'];
         
-        $tags_mc = self::$memcache->get( array_keys($cobj['tags']) );
+        $tags_mc = self::$memstore->get( array_keys($cobj['tags']) );
         # Если в кеше утеряна информация о каком либо теге, то сбрасывается кеш ассоциированный с этим тегом
         if( count($tags_mc)!= $tags_cnt){
             if($lock->set($key))
@@ -181,7 +181,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
         # проверяем наличие тегов и при необходимости устанавливаем их
         $tags_cnt = count($tags);
         
-        if( 0==$tags_cnt || false===($tags_mc = self::$memcache->get( $tags )) )
+        if( 0==$tags_cnt || false===($tags_mc = self::$memstore->get( $tags )) )
            $tags_mc = Array();
         
         if( $tags_cnt>0 && count($tags_mc)!= $tags_cnt)
@@ -190,7 +190,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
                if(!isset($tags_mc[$tags[$i]]))
                   {
                     $tags_mc[$tags[$i]] = $thetime;
-                    self::$memcache->set( $tags[$i], $thetime, false, 0 );
+                    self::$memstore->set( $tags[$i], $thetime);
                   }
           }
         $expire = (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime);
@@ -199,8 +199,8 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
                       'tags' => $tags_mc
                     );
         
-        self::$memcache->set(self::EXPR_PREF . $this->key, $expire, false, 0);
-        self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
+        self::$memstore->set(self::EXPR_PREF . $this->key, $expire);
+        self::$memstore->set($this->key, $cobj);
         
         # Пишем кеш в файл
         $this->getPath();
@@ -222,7 +222,7 @@ class Cacher_Backend_MemReFile implements Cacher_Backend {
      * function del
      */
     function del(){
-        return self::$memcache->delete(self::EXPR_PREF . $this->key, 0);
+        return self::$memstore->del(self::EXPR_PREF . $this->key);
     }
     
     /*

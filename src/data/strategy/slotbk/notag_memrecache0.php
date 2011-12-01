@@ -38,17 +38,17 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
       */
     const MAX_LTIME = CONFIG_Cacher_BK_MemReCache0::MAX_LTIME;
     
-    private static $memcache=null;
+    private static $memstore = NULL;
     private $key;
     
     function __construct($CacheKey) {
         $this->key  = $CacheKey;
-        self::$memcache = Mcache::init();
+        self::$memstore = Memstore::init();
     }
     
     public function get() {
         # если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===($cobj = self::$memcache->get($this->key)) || !isset($cobj[0]) || !isset($cobj[1]) )
+        if( false===($cobj = self::$memstore->get($this->key)) || !isset($cobj[0]) || !isset($cobj[1]) )
             return false;
         list($rez, $expire) = $cobj;
         
@@ -67,10 +67,10 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
      * function get
      */
     static function multiGet($keys){
-        !self::$memcache && (self::$memcache = Mcache::init());
+        !self::$memstore && (self::$memstore = Memstore::init());
         
         # если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===($cobj = self::$memcache->get($keys)))
+        if( false===($cobj = self::$memstore->get($keys)))
            return false;
         
         $rez = array();
@@ -101,7 +101,7 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
                       0 => $CacheVal,
                       1 => (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime)
                      );
-        self::$memcache->set($this->key, $cobj, Mcache::COMPRES, 0);
+        self::$memstore->set($this->key, $cobj);
         return $CacheVal;
     }
     
@@ -111,7 +111,7 @@ class Cacher_Backend_notag_MemReCache0 implements Cacher_Backend{
      * function del
      */
     public function del(){
-        return self::$memcache->delete($this->key, 0);
+        return self::$memstore->del($this->key);
     }
     
     /*

@@ -7,7 +7,7 @@
 
 class Cacher_Lock_Memstore extends Cacher_Lock {
     
-    protected static $memcache=NULL;
+    protected static $memstore = NULL;
     
     /**
       * Префикс для формирования ключа блокировки
@@ -29,10 +29,10 @@ class Cacher_Lock_Memstore extends Cacher_Lock {
      * @return bool
      */
     public function set($key) {
-        !self::$memcache && ( self::$memcache = Mcache::init() );
+        !self::$memstore && ( self::$memstore = Memstore::init() );
         self::$locked[$key] = isset(self::$locked[$key]) && self::$locked[$key];
-        if( !(self::$locked[$key]) && !(self::$memcache->get(self::LOCK_PREF . $key)) )
-            self::$locked[$key] = self::$memcache->add(self::LOCK_PREF . $key,true,false,self::LOCK_TIME);
+        if( !(self::$locked[$key]) && !(self::$memstore->get(self::LOCK_PREF . $key)) )
+            self::$locked[$key] = self::$memstore->add(self::LOCK_PREF . $key,1,self::LOCK_TIME);
         return self::$locked[$key];
     }
     
@@ -43,8 +43,8 @@ class Cacher_Lock_Memstore extends Cacher_Lock {
      * @return bool
      */
     public function del($key) {
-        !self::$memcache && ( self::$memcache = Mcache::init() );
-        if(isset(self::$locked[$key]) && self::$locked[$key] && self::$memcache->delete(self::LOCK_PREF . $key, 0)) {
+        !self::$memstore && ( self::$memstore = Memstore::init() );
+        if(isset(self::$locked[$key]) && self::$locked[$key] && self::$memstore->del(self::LOCK_PREF . $key)) {
             unset(self::$locked[$key]);
             return true;
         }

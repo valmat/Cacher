@@ -10,12 +10,12 @@
 
 class Cacher_Backend_notag_Memcache  implements Cacher_Backend{
     
-    private static $memcache=null;
+    private static $memstore = NULL;
     private $key;
        
     function __construct($CacheKey) {
         $this->key  = $CacheKey;
-        self::$memcache = Mcache::init();
+        self::$memstore = Memstore::init();
     }
 
     /*
@@ -24,7 +24,7 @@ class Cacher_Backend_notag_Memcache  implements Cacher_Backend{
      */
     public function get(){
         # если объекта в кеше не нашлось
-        if( false===($cobj = self::$memcache->get($this->key)) )
+        if( false===($cobj = self::$memstore->get($this->key)) )
            return false;
         
         return $cobj;
@@ -35,9 +35,9 @@ class Cacher_Backend_notag_Memcache  implements Cacher_Backend{
      * function get
      */
     static function multiGet($keys){
-        !self::$memcache && (self::$memcache = Mcache::init());
+        !self::$memstore && (self::$memstore = Memstore::init());
         # Если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===( $Cobjs = self::$memcache->get( $keys )) ){
+        if( false===( $Cobjs = self::$memstore->get( $keys )) ){
             return false;
         }
         
@@ -58,7 +58,7 @@ class Cacher_Backend_notag_Memcache  implements Cacher_Backend{
      * @param $LifeTime int
      */
     function set($CacheVal, $tags, $LifeTime){
-        self::$memcache->set($this->key, $CacheVal, Mcache::COMPRES, $LifeTime);
+        self::$memstore->set($this->key, $CacheVal, $LifeTime);
         return $CacheVal;
     }
     
@@ -67,7 +67,7 @@ class Cacher_Backend_notag_Memcache  implements Cacher_Backend{
      * function del
      */
     function del(){
-        return self::$memcache->delete($this->key, 0);
+        return self::$memstore->del($this->key);
     }
     
     /*

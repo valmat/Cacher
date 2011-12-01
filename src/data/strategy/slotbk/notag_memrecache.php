@@ -46,17 +46,17 @@ class Cacher_Backend_notag_MemReCache implements Cacher_Backend {
       */
     const EXPR_PREF = CONFIG_Cacher_BK_MemReCache::EXPR_PREF;
     
-    private static $memcache=null;
+    private static $memstore = NULL;
     private $key;
     
     function __construct($CacheKey) {
         $this->key  = $CacheKey;
-        self::$memcache = Mcache::init();
+        self::$memstore = Memstore::init();
     }
     
     public function get() {
         # Если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===( $c_arr = self::$memcache->get(array($this->key, self::EXPR_PREF . $this->key)) ) ) {
+        if( false===( $c_arr = self::$memstore->get(array($this->key, self::EXPR_PREF . $this->key)) ) ) {
            return false;
         }
         if(!isset($c_arr[$this->key])) {
@@ -78,10 +78,10 @@ class Cacher_Backend_notag_MemReCache implements Cacher_Backend {
      * function get
      */
     static function multiGet($keys) {
-        !self::$memcache && (self::$memcache = Mcache::init());
+        !self::$memstore && (self::$memstore = Memstore::init());
         $expir_keys  = array_map ( 'self::expirKey' , $keys );
         # Если объекта в кеше не нашлось, то безусловно перекешируем
-        if( false===( $c_arr = self::$memcache->get( array_merge ( $expir_keys, $keys ) )) ){
+        if( false===( $c_arr = self::$memstore->get( array_merge ( $expir_keys, $keys ) )) ){
             return false;
         }
         
@@ -115,8 +115,8 @@ class Cacher_Backend_notag_MemReCache implements Cacher_Backend {
         $thetime = time();
         $expire = (((0==$LifeTime)?(self::MAX_LTIME):$LifeTime)+$thetime);
         
-        self::$memcache->set($this->key, $CacheVal, Mcache::COMPRES, 0);
-        self::$memcache->set(self::EXPR_PREF.$this->key, $expire, false, 0);
+        self::$memstore->set($this->key, $CacheVal);
+        self::$memstore->set(self::EXPR_PREF.$this->key, $expire);
         
         return $CacheVal;
     }
@@ -127,7 +127,7 @@ class Cacher_Backend_notag_MemReCache implements Cacher_Backend {
      * function del
      */
     function del(){
-        return self::$memcache->delete(self::EXPR_PREF . $this->key, 0);
+        return self::$memstore->del(self::EXPR_PREF . $this->key);
     }
     
     /*
