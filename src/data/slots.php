@@ -20,8 +20,8 @@
    function Cacher_Slot_Test() {
       //return array(CacheTypes::FAST , 10);
       
-      #return array('Memcache' , 10);
-      return array('MemReCache' , 10);
+      return array('Memcache' , 10);
+      #return array('MemReCache' , 10);
       #return array('MemReCache0' , 10);
       #return array('MemReFile' , 10);
       #return array('notag_Memcache' , 10);

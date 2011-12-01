@@ -44,7 +44,8 @@ function print_time($cmnt = ''){
  require './config/Cacher.php';
  require './config/Cacher_Backends.php';
  //require './config/CacherTag.php';
- require './config/base.php';
+ 
+ //require './config/base.php';
  
  
  

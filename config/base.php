@@ -29,6 +29,6 @@ class Mcache {
     }
     protected function __construct() {}
     protected function __clone() {}
- }
+}
 
 ?>

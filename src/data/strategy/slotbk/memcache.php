@@ -34,7 +34,7 @@
 
 class Cacher_Backend_Memcache  implements Cacher_Backend{
     
-    private static $memcache=null;
+    private static $memcache=NULL;
     private $key;
        
     function __construct($CacheKey) {
