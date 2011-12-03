@@ -107,7 +107,7 @@ function print_time($cmnt = ''){
         //echo "<hr>setTag: ", Cacher_Tag::create('SmplTag', $key)->getKey();
         
         
-        $slots[$key]->addTag( Cacher_Tag::create('SmplTag', $key) );
+        //$slots[$key]->addTag( Cacher_Tag::create('SmplTag', $key) );
         
         
         //sleep(1);// hard data
