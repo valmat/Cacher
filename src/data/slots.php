@@ -20,7 +20,7 @@
    function Cacher_Slot_Test() {
       //return array(CacheTypes::FAST , 10);
       
-      $ttl = 3;
+      $ttl = 10;
       return array('Memcache' , $ttl);
       #return array('MemReCache' , $ttl);
       #return array('MemReCache0' , $ttl);
