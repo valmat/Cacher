@@ -237,27 +237,21 @@ class RedisCache implements Memstore_Interface {
 	self::$r = new Redis(self::HOST, self::PORT);
     }
     
-    public function __destruct() {
-	self::$r->quit();
-    }
-    
     /*
      * @param $key string or array
      * @return mixed
      */
     public function get($key) {
-	$rez = self::$r->get($key);
 	if(!is_array($key)) {
-	    return (NULL==$rez)? false : unserialize($rez);
+	    return unserialize(self::$r->get($key));
 	}
-	$rez =
-	    array_map('unserialize',
-		array_filter ( array_combine($key, $rez),
-		    function($v){
-			return (NULL!==$v);
-		    })
+	return 
+	    array_combine ($key,
+		array_merge (
+		    array_fill_keys($key, false),
+		    array_map('unserialize',self::$r->get($key))
+		)
 	    );
-	return $rez;
     }
     
     /*
@@ -268,12 +262,7 @@ class RedisCache implements Memstore_Interface {
      * @return bool
      */
     public function set($key, $data, $ttl = 0) {
-	//return self::$r->set($key, $data);
-	$val = serialize($data);
-	return  'OK' ==
-		($ttl ?
-			self::$r->SETEX($key, $ttl, $val):
-			self::$r->set($key, $val));
+	return self::$r->set($key, serialize($data), $ttl);
     }
     
     /*
@@ -285,11 +274,7 @@ class RedisCache implements Memstore_Interface {
      * @return bool
      */
     public function add($key, $data, $ttl = 0) {
-	$val = serialize($data);
-	if( ($rez = self::$r->set($key, $val, true)) && $ttl ) {
-	    self::$r->SETEX($key, $ttl, $val);
-	}
-	return $rez;
+	return self::$r->add($key, serialize($data), $ttl);
     }
     
     /*
@@ -297,7 +282,7 @@ class RedisCache implements Memstore_Interface {
      * @return bool
      */
     public function del($key) {
-	return (bool)self::$r->delete($key);
+	return self::$r->del($key);
     }
     
 }
